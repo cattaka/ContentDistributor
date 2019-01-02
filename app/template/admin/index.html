@@ -7,7 +7,7 @@
     <script src="https://cdn.firebase.com/libs/firebaseui/2.6.2/firebaseui.js"></script>
     <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/2.6.2/firebaseui.css"/>
 
-    <link rel="stylesheet" type="text/css" href="/app/static/style.css">
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
     <script>
         // Initialize Firebase
         var config = {
@@ -20,7 +20,7 @@
         };
         firebase.initializeApp(config);
     </script>
-    <script src="/app/static/index.js"></script>
+    <script src="/static/index.js"></script>
 </head>
 <body>
 
@@ -28,14 +28,22 @@
 
 {{with .Notice}}<div id="notice">{{.}}</div>{{end}}
 
+{{define "displayIfSignedIn"}}{{ if .SignedIn }}block{{ else }}none{{ end }}{{end}}
+{{define "displayIfNotSignedIn"}}{{ if .SignedIn }}none{{ else }}block{{ end }}{{end}}
+{{define "trueIfSignedIn"}}{{ if .SignedIn }}true{{ else }}false{{ end }}{{end}}
+{{define "trueIfNotSignedIn"}}{{ if .SignedIn }}false{{ else }}true{{ end }}{{end}}
+
 <div id="firebaseui-auth-container"></div>
 <div id="sign-in"></div>
-<div>
-    <span id="account-details"></span>
-    <button id="sign-out" hidden=true>Sign Out</button>
-</div>
 
-<form id="post-form" enctype="multipart/form-data" action="/admin/signIn" method="post" hidden="true">
+<span id="account-details"></span>
+
+<div style="display: {{template "displayIfSignedIn" .}}">
+    <button id="sign-out">Sign Out</button>
+</div>
+<form id="signOut-form" enctype="multipart/form-data" action="/admin/signOut" method="post" hidden="true" data-enabled="{{template "trueIfSignedIn" .}}">
+</form>
+<form id="signIn-form" enctype="multipart/form-data" action="/admin/signIn" method="post" hidden="true" data-enabled="{{template "trueIfNotSignedIn" .}}">
     <input type="hidden" name="token" id="token">
 </form>
 

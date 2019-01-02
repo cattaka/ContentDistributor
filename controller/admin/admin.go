@@ -17,6 +17,7 @@ const (
 
 type templateParams struct {
 	Notice string
+	SignedIn bool
 }
 
 func IndexHandler(cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
@@ -38,8 +39,12 @@ func IndexHandler(cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
 }
 
 func showIndex(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
-	htmlTemplate := template.Must(template.ParseFiles("template/admin/index.html"))
 	params := templateParams{}
+	if _, found := cb.Session.Values[KeyAuthToken]; found {
+		params.SignedIn = true
+	}
+
+	htmlTemplate := template.Must(template.ParseFiles("template/admin/index.html"))
 	htmlTemplate.Execute(w, params)
 }
 
@@ -55,6 +60,7 @@ func signIn(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, r *
 	if err != nil { panic(err) }
 
 	cb.Session.Values[KeyAuthToken] = token
+	cb.Session.Save(r, w)
 
 	http.Redirect(w, r, "/admin/", http.StatusFound)
 }
@@ -62,6 +68,7 @@ func signIn(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, r *
 func signOut(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
 	if _, found := cb.Session.Values[KeyAuthToken]; found {
 		delete(cb.Session.Values, KeyAuthToken)
+		cb.Session.Save(r, w)
 	}
 	http.Redirect(w, r, "/admin/", http.StatusFound)
 }
