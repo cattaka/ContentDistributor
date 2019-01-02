@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+    <title>ContentDistrbutor</title>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+</head>
+<body>
+<div class="header">
+    <a href="/admin/signInOut">{{ if .SignedIn }}sign in{{ else }}sign out{{ end }}</a>
+</div>
+
+<h1>ContentDistrbutor editDistribution</h1>
+
+{{ with .Distribution }}
+<form method="post" action="/admin/editDistribution">
+    <input type="hidden" name="Key" value="{{.Key.Encode}}">
+    <ul>
+        <li>Title: <input type="text" name="Title" value="{{.Title}}"></li>
+        <li>ExpiredAt: <input type="date" name="ExpiredAt" value="{{.ExpiredAt.Format "2006-01-02"}}"></li>
+        <li>RealExpiredAt: <input type="date" name="RealExpiredAt" value="{{.RealExpiredAt.Format "2006-01-02"}}"></li>
+        <li>CoverImageURL: <input type="text" name="CoverImageURL" value="{{.CoverImageURL}}"></li>
+    </ul>
+    <input type="submit" value="submit"/>
+</form>
+{{ end }}
+
+</body>
+</html>

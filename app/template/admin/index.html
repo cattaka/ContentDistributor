@@ -11,8 +11,18 @@
 
 <h1>ContentDistrbutor</h1>
 
+{{ range .Distributions }}
+<ul>
+    <li>{{ .Key.Encode }}</li>
+    <li>{{ .Title }}</li>
+    <li>{{ .ExpiredAt.Format "2006-01-02" }}</li>
+    <li>{{ .RealExpiredAt.Format "2006-01-02" }}</li>
+    <li>{{ .CoverImageURL }}</li>
 
-<a href="/admin/createDistribution">Create Distribution</a>
+</ul>
+{{ end }}
+
+<a href="/admin/editDistribution">Create Distribution</a>
 
 </body>
 </html>

@@ -9,18 +9,21 @@ import (
 	"context"
 	"github.com/cattaka/ContentDistributor/entity"
 	"github.com/cattaka/ContentDistributor/repository"
+	"google.golang.org/appengine/datastore"
+	"time"
 )
 
 const (
-	sessionName = "MainSession"
-	PathPrefix  = "/admin/"
+	sessionName  = "MainSession"
+	PathPrefix   = "/admin/"
 	KeyAuthToken = "AuthToken"
 )
 
 type templateParams struct {
-	Notice string
-	SignedIn bool
-	Distributions []entity.Distribution
+	Notice          string
+	SignedIn        bool
+	Distributions   []entity.Distribution
+	Distribution    *entity.Distribution
 }
 
 func IndexHandler(cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
@@ -36,6 +39,10 @@ func IndexHandler(cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
 		showIndex(&ctx, cb, w, r)
 	} else if r.Method == "GET" && r.URL.Path == PathPrefix+"signInOut" {
 		showSignInOut(&ctx, cb, w, r)
+	} else if r.Method == "GET" && r.URL.Path == PathPrefix+"editDistribution" {
+		showEditDistribution(&ctx, cb, w, r)
+	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"editDistribution" {
+		postEditDistribution(&ctx, cb, w, r)
 	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"signIn" {
 		signIn(&ctx, cb, w, r)
 	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"signOut" {
@@ -67,18 +74,26 @@ func showSignInOut(ctx *context.Context, cb core.CoreBundle, w http.ResponseWrit
 func signIn(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
 	token := r.FormValue("token")
 	app, err := firebase.NewApp(*ctx, nil, *cb.ClientOption)
-	if err != nil { panic(err) }
+	if err != nil {
+		panic(err)
+	}
 	auth, err := app.Auth(*ctx)
-	if err != nil { panic(err) }
+	if err != nil {
+		panic(err)
+	}
 	tok, err := auth.VerifyIDTokenAndCheckRevoked(*ctx, r.FormValue("token"))
-	if err != nil { panic(err) }
+	if err != nil {
+		panic(err)
+	}
 	_, err = auth.GetUser(*ctx, tok.UID)
-	if err != nil { panic(err) }
+	if err != nil {
+		panic(err)
+	}
 
 	cb.Session.Values[KeyAuthToken] = token
 	cb.Session.Save(r, w)
 
-	http.Redirect(w, r, "/admin/", http.StatusFound)
+	http.Redirect(w, r, PathPrefix, http.StatusFound)
 }
 
 func signOut(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
@@ -86,5 +101,49 @@ func signOut(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, r 
 		delete(cb.Session.Values, KeyAuthToken)
 		cb.Session.Save(r, w)
 	}
-	http.Redirect(w, r, "/admin/", http.StatusFound)
+	http.Redirect(w, r, PathPrefix, http.StatusFound)
+}
+
+func showEditDistribution(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
+	params := templateParams{}
+	if _, found := cb.Session.Values[KeyAuthToken]; !found {
+		http.Redirect(w, r, PathPrefix, http.StatusFound)
+		return
+	}
+	params.SignedIn = true
+
+	if k, err := datastore.DecodeKey(r.FormValue("Key")); err == nil {
+		if item, e2 := repository.FindDistribution(*ctx, k); e2 == nil {
+			params.Distribution = item
+		}
+	}
+	if params.Distribution == nil {
+		item := entity.Distribution{}
+		params.Distribution = &item
+	}
+
+	htmlTemplate := template.Must(template.ParseFiles("template/admin/editDistribution.html"))
+	htmlTemplate.Execute(w, params)
+}
+
+func postEditDistribution(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
+	if _, found := cb.Session.Values[KeyAuthToken]; !found {
+		http.Redirect(w, r, PathPrefix, http.StatusFound)
+		return
+	}
+
+	format := "2006-01-02"
+	k, _ := datastore.DecodeKey(r.FormValue("Key"))
+	expiredAt, _ := time.Parse(format, r.FormValue("ExpiredAt"))
+	realExpiredAt, _ := time.Parse(format, r.FormValue("RealExpiredAt"))
+	item := entity.Distribution{
+		Key:           k,
+		Title:         r.FormValue("Title"),
+		ExpiredAt:     expiredAt,
+		RealExpiredAt: realExpiredAt,
+		CoverImageURL: r.FormValue("CoverImageURL"),
+	}
+	repository.SaveDistribution(*ctx, &item)
+
+	http.Redirect(w, r, PathPrefix, http.StatusFound)
 }
