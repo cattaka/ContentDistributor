@@ -2,13 +2,14 @@ package entity
 
 import (
 	"google.golang.org/appengine/datastore"
+	"google.golang.org/genproto/googleapis/type/date"
 )
 
 type Distribution struct {
 	Key   *datastore.Key `datastore:"__key__"`
 	Title string
-	//ExpiredAt     date.Date
-	//RealExpiredAt date.Date
+	ExpiredAt     date.Date
+	RealExpiredAt date.Date
 	CoverImageURL string
 }
 

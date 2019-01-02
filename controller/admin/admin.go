@@ -7,6 +7,8 @@ import (
 	"github.com/cattaka/ContentDistributor/core"
 	"firebase.google.com/go"
 	"context"
+	"github.com/cattaka/ContentDistributor/entity"
+	"github.com/cattaka/ContentDistributor/repository"
 )
 
 const (
@@ -18,6 +20,7 @@ const (
 type templateParams struct {
 	Notice string
 	SignedIn bool
+	Distributions []entity.Distribution
 }
 
 func IndexHandler(cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
@@ -44,6 +47,7 @@ func showIndex(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, 
 	params := templateParams{}
 	if _, found := cb.Session.Values[KeyAuthToken]; found {
 		params.SignedIn = true
+		params.Distributions, _ = repository.FindDistributionsAll(*ctx)
 	}
 
 	htmlTemplate := template.Must(template.ParseFiles("template/admin/index.html"))
