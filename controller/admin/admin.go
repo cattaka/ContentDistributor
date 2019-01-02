@@ -31,6 +31,8 @@ func IndexHandler(cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "GET" && r.URL.Path == PathPrefix {
 		showIndex(&ctx, cb, w, r)
+	} else if r.Method == "GET" && r.URL.Path == PathPrefix+"signInOut" {
+		showSignInOut(&ctx, cb, w, r)
 	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"signIn" {
 		signIn(&ctx, cb, w, r)
 	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"signOut" {
@@ -45,6 +47,16 @@ func showIndex(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, 
 	}
 
 	htmlTemplate := template.Must(template.ParseFiles("template/admin/index.html"))
+	htmlTemplate.Execute(w, params)
+}
+
+func showSignInOut(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
+	params := templateParams{}
+	if _, found := cb.Session.Values[KeyAuthToken]; found {
+		params.SignedIn = true
+	}
+
+	htmlTemplate := template.Must(template.ParseFiles("template/admin/signInOut.html"))
 	htmlTemplate.Execute(w, params)
 }
 
