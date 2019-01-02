@@ -11,6 +11,7 @@ import (
 	"github.com/cattaka/ContentDistributor/repository"
 	"google.golang.org/appengine/datastore"
 	"time"
+	"fmt"
 )
 
 const (
@@ -20,10 +21,11 @@ const (
 )
 
 type templateParams struct {
-	Notice          string
-	SignedIn        bool
-	Distributions   []entity.Distribution
-	Distribution    *entity.Distribution
+	Notice            string
+	SignedIn          bool
+	Distributions     []entity.Distribution
+	Distribution      *entity.Distribution
+	DistributionFiles []entity.DistributionFile
 }
 
 func IndexHandler(cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
@@ -43,6 +45,8 @@ func IndexHandler(cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
 		showEditDistribution(&ctx, cb, w, r)
 	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"editDistribution" {
 		postEditDistribution(&ctx, cb, w, r)
+	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"postDistributionFile" {
+		postDistributionFile(&ctx, cb, w, r)
 	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"signIn" {
 		signIn(&ctx, cb, w, r)
 	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"signOut" {
@@ -115,6 +119,9 @@ func showEditDistribution(ctx *context.Context, cb core.CoreBundle, w http.Respo
 	if k, err := datastore.DecodeKey(r.FormValue("Key")); err == nil {
 		if item, e2 := repository.FindDistribution(*ctx, k); e2 == nil {
 			params.Distribution = item
+			if files,e3 := repository.FindDistributionFiles(*ctx, k); e3 == nil {
+				params.DistributionFiles = files
+			}
 		}
 	}
 	if params.Distribution == nil {
@@ -145,5 +152,17 @@ func postEditDistribution(ctx *context.Context, cb core.CoreBundle, w http.Respo
 	}
 	repository.SaveDistribution(*ctx, &item)
 
-	http.Redirect(w, r, PathPrefix, http.StatusFound)
+	http.Redirect(w, r, fmt.Sprintf("%seditDistribution?Key=%s", PathPrefix, k.Encode()), http.StatusFound)
+}
+
+func postDistributionFile(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
+	if _, found := cb.Session.Values[KeyAuthToken]; !found {
+		http.Redirect(w, r, PathPrefix, http.StatusFound)
+		return
+	}
+
+	k, _ := datastore.DecodeKey(r.FormValue("Key"))
+	// TODO
+
+	http.Redirect(w, r, fmt.Sprintf("%seditDistribution?Key=%s", PathPrefix, k.Encode()), http.StatusFound)
 }

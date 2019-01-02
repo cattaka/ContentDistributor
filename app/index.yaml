@@ -15,3 +15,8 @@ indexes:
   - name: ExpiredAt
     direction: desc
   - name: Title
+
+- kind: DistributionFile
+  properties:
+  - name: parentKey
+  - name: FileName

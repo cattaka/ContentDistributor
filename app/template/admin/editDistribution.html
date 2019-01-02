@@ -13,7 +13,7 @@
 
 {{ with .Distribution }}
 <form method="post" action="/admin/editDistribution">
-    <input type="hidden" name="Key" value="{{.Key.Encode}}">
+    <input type="hidden" name="Key" value="{{if .Key}}{{.Key.Encode}}{{end}}">
     <ul>
         <li>Title: <input type="text" name="Title" value="{{.Title}}"></li>
         <li>ExpiredAt: <input type="date" name="ExpiredAt" value="{{.ExpiredAt.Format "2006-01-02"}}"></li>
@@ -23,6 +23,22 @@
     <input type="submit" value="submit"/>
 </form>
 {{ end }}
+
+{{if .Distribution.Key}}
+    <h2>Files</h2>
+    {{ range .DistributionFiles }}
+        TODO
+    {{end}}
+
+    <form method="post" action="/admin/addDistributionFile">
+        <input type="hidden" name="Key" value="{{if .Distribution.Key}}{{.Distribution.Key.Encode}}{{end}}">
+        <ul>
+            <li>FileName: <input type="text" name="FileName"></li>
+            <li>File: <input type="file" name="File"></li>
+        </ul>
+        <input type="submit" value="submit"/>
+    </form>
+{{end}}
 
 </body>
 </html>
