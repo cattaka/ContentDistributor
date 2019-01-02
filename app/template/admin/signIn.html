@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+<head>
+    <title>ContentDistributor Admin</title>
+
+    <script src="https://www.gstatic.com/firebasejs/5.7.2/firebase.js"></script>
+    <script src="https://cdn.firebase.com/libs/firebaseui/2.6.2/firebaseui.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/2.6.2/firebaseui.css"/>
+
+    <link rel="stylesheet" type="text/css" href="/app/static/style.css">
+    <script>
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyCrAaiLZdTaLulRAK4cvR6wNdteDRvc430",
+            authDomain: "my-learning-project-140015.firebaseapp.com",
+            databaseURL: "https://my-learning-project-140015.firebaseio.com",
+            projectId: "my-learning-project-140015",
+            storageBucket: "my-learning-project-140015.appspot.com",
+            messagingSenderId: "630242764426"
+        };
+        firebase.initializeApp(config);
+    </script>
+    <script src="/app/static/index.js"></script>
+</head>
+<body>
+
+<h1>ContentDistributor Admin</h1>
+
+{{with .Notice}}<div id="notice">{{.}}</div>{{end}}
+
+<div id="firebaseui-auth-container"></div>
+<div id="sign-in"></div>
+<div>
+    <span id="account-details"></span>
+    <button id="sign-out" hidden=true>Sign Out</button>
+</div>
+
+<form id="post-form" enctype="multipart/form-data" action="/admin/signIn" method="post" hidden="true">
+    <input type="hidden" name="token" id="token">
+</form>
+
+</body>
+</html>
