@@ -8,11 +8,21 @@ import (
 
 var (
 	sessionSecret = []byte("SessionSecret")
-	sessionStore = cascadestore.NewCascadeStore(cascadestore.DistributedBackends, sessionSecret)
+	sessionStore  = cascadestore.NewCascadeStore(cascadestore.DistributedBackends, sessionSecret)
 )
 
+type FirebaseConfig struct {
+	ApiKey            string `json:"apiKey"`
+	AuthDomain        string `json:"authDomain"`
+	DatabaseURL       string `json:"databaseURL"`
+	ProjectId         string `json:"projectId"`
+	StorageBucket     string `json:"storageBucket"`
+	MessagingSenderId string `json:"messagingSenderId"`
+}
+
 type CoreBundle struct {
-	SessionStore *cascadestore.CascadeStore
-	Session *sessions.Session
-	ClientOption *option.ClientOption
+	SessionStore   *cascadestore.CascadeStore
+	Session        *sessions.Session
+	ClientOption   *option.ClientOption
+	FirebaseConfig *FirebaseConfig
 }

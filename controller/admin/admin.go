@@ -26,6 +26,7 @@ type templateParams struct {
 	Distributions     []entity.Distribution
 	Distribution      *entity.Distribution
 	DistributionFiles []entity.DistributionFile
+	FirebaseConfig    core.FirebaseConfig
 }
 
 func IndexHandler(cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
@@ -70,6 +71,7 @@ func showSignInOut(ctx *context.Context, cb core.CoreBundle, w http.ResponseWrit
 	if _, found := cb.Session.Values[KeyAuthToken]; found {
 		params.SignedIn = true
 	}
+	params.FirebaseConfig = *cb.FirebaseConfig
 
 	htmlTemplate := template.Must(template.ParseFiles("template/admin/signInOut.html"))
 	htmlTemplate.Execute(w, params)
@@ -119,7 +121,7 @@ func showEditDistribution(ctx *context.Context, cb core.CoreBundle, w http.Respo
 	if k, err := datastore.DecodeKey(r.FormValue("Key")); err == nil {
 		if item, e2 := repository.FindDistribution(*ctx, k); e2 == nil {
 			params.Distribution = item
-			if files,e3 := repository.FindDistributionFiles(*ctx, k); e3 == nil {
+			if files, e3 := repository.FindDistributionFiles(*ctx, k); e3 == nil {
 				params.DistributionFiles = files
 			}
 		}

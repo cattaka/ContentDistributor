@@ -10,14 +10,7 @@
 
     <script>
         // Initialize Firebase
-        var config = {
-            apiKey: "AIzaSyCrAaiLZdTaLulRAK4cvR6wNdteDRvc430",
-            authDomain: "my-learning-project-140015.firebaseapp.com",
-            databaseURL: "https://my-learning-project-140015.firebaseio.com",
-            projectId: "my-learning-project-140015",
-            storageBucket: "my-learning-project-140015.appspot.com",
-            messagingSenderId: "630242764426"
-        };
+        var config = {{ .FirebaseConfig }};
         firebase.initializeApp(config);
     </script>
     <script src="/static/signInOut.js"></script>
