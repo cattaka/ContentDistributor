@@ -27,6 +27,12 @@ indexes:
   properties:
   - name: Disabled
   - name: Parent
+  - name: IdLabel
+
+- kind: DistributionCode
+  properties:
+  - name: Disabled
+  - name: Parent
   - name: IndexId
 
 - kind: DistributionFile
