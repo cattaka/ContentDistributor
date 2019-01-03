@@ -9,6 +9,9 @@ import (
 	"cloud.google.com/go/storage"
 )
 
+const STORAGE_URL_BASE = "https://storage.googleapis.com/"
+const STORAGE_URL_FORMAT = STORAGE_URL_BASE + "%s/%s"
+
 func UploadFile(
 	ctx context.Context,
 	cb core.CoreBundle,
@@ -43,6 +46,5 @@ func UploadFile(
 		return "", err
 	}
 
-	const publicURL = "https://storage.googleapis.com/%s/%s"
-	return fmt.Sprintf(publicURL, cb.FirebaseConfig.StorageBucket, fileFullPath), nil
+	return fmt.Sprintf(STORAGE_URL_FORMAT, cb.FirebaseConfig.StorageBucket, fileFullPath), nil
 }

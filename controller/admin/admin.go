@@ -256,11 +256,21 @@ func showEditDistributionCodes(ctx *context.Context, cb core.CoreBundle, w http.
 		http.Redirect(w, r, PathPrefix, http.StatusFound)
 		return
 	} else if item, e2 := repository.FindDistribution(*ctx, k); e2 != nil {
-		http.Redirect(w, r, PathPrefix, http.StatusFound)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
 		return
-	} else if codes, e3 := repository.FindDistributionCodes(*ctx, k, false); e3 == nil {
+	} else if files, e3 := repository.FindDistributionFiles(*ctx, k, false); e3 != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	} else if codes, e4 := repository.FindDistributionCodes(*ctx, k, false); e4 != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	} else {
 		params.Distribution = item
 		params.DistributionCodes = codes
+		params.DistributionFiles = files
 	}
 
 	htmlTemplate := template.Must(template.ParseFiles("template/admin/editDistributionCodes.html"))
@@ -310,7 +320,7 @@ func generateDistributionCodes(ctx *context.Context, cb core.CoreBundle, w http.
 				Disabled: false,
 			})
 	}
-	if err := repository.SaveDistributionCodes(*ctx, &distributionCodes) ; err != nil {
+	if err := repository.SaveDistributionCodes(*ctx, &distributionCodes); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return

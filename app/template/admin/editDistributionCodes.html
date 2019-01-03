@@ -23,17 +23,27 @@
     </form>
 
     <h2>Codes</h2>
-    <ul>
-    {{ range .DistributionCodes }}
-        <li>
-            <a href="TODO">{{.IdLabel}}</a>
-            <form style="display: inline" method="post" action="/admin/toggleDistributionCode">
-                <input type="hidden" name="Disable" value="{{if .Disabled}}true{{else}}false{{end}}">
-                <input type="submit" value="Toggle">
-            </form>
-        </li>
+    <table>
+    {{ $codes := .DistributionCodes }}
+    {{ $files := .DistributionFiles }}
+    {{ range $code := $codes }}
+        <tr>
+            <td>{{$code.IdLabel}}</td>
+            <td>
+            {{ range $file := $files }}
+                <span><a href="/{{$code.Key.Encode}}/{{$file.FileName}}">{{ $file.FileName }}</a></span>
+            {{ end }}
+            </td>
+            <td>{{$code.Count}}</td>
+            <td>
+                <form style="display: inline" method="post" action="/admin/toggleDistributionCode">
+                    <input type="hidden" name="Disable" value="{{if .Disabled}}true{{else}}false{{end}}">
+                    <input type="submit" value="Toggle">
+                </form>
+            </td>
+        </tr>
     {{end}}
-    </ul>
+    </table>
 
 </body>
 </html>
