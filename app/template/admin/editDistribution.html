@@ -8,6 +8,11 @@
 <div class="header">
     <a href="/admin/signInOut">{{ if .SignedIn }}sign out{{ else }}sign in{{ end }}</a>
 </div>
+<div class="navigation">
+    <a href="/admin/">Admin</a>
+    &gt;
+    Distribution
+</div>
 
 <h1>ContentDistrbutor editDistribution</h1>
 
@@ -21,40 +26,82 @@
         <li>ExpiredAt: <input type="date" name="ExpiredAt" value="{{.ExpiredAt.Format "2006-01-02"}}"></li>
         <li>RealExpiredAt: <input type="date" name="RealExpiredAt" value="{{.RealExpiredAt.Format "2006-01-02"}}"></li>
         <li>CoverImageUrl: <input type="text" name="CoverImageUrl" value="{{.CoverImageUrl}}"></li>
+        <li><input type="submit" value="Update"/></li>
     </ul>
-    <input type="submit" value="submit"/>
 </form>
 {{ end }}
 
 {{if .Distribution.Key}}
-<h2>Files</h2>
-<ul>
+<h2>Distribution Files</h2>
+<h3>File list</h3>
+<table>
+    <tr>
+        <th>FileName</th>
+        <th>ShortLabel</th>
+        <th></th>
+    </tr>
 {{ range .DistributionFiles }}
-    <li>
-        <span>{{.FileName}}</span>
-        <span>{{.ShortLabel}}</span>
-        <form style="display: inline" method="post" action="/admin/deleteDistributionFile">
-            <input type="hidden" name="Key" value="{{.Key.Encode}}">
-            <input type="submit" value="Delete">
-        </form>
-    </li>
+    <tr>
+        <td>{{.FileName}}</td>
+        <td>{{.ShortLabel}}</td>
+        <td>
+            <form style="display: inline" method="post" action="/admin/deleteDistributionFile">
+                <input type="hidden" name="Key" value="{{.Key.Encode}}">
+                <input type="submit" value="Delete">
+            </form>
+        </td>
+    </tr>
 {{end}}
-</ul>
-<a href="https://console.cloud.google.com/storage/browser/{{$firebaseConfig.StorageBucket}}/o/{{.Distribution.Key.Encode}}/?project={{$firebaseConfig.StorageBucket}}">Open in Google Storage</a>
+</table>
+<a href="https://console.cloud.google.com/storage/browser/{{$firebaseConfig.StorageBucket}}/o/{{.Distribution.Key.Encode}}/?project={{$firebaseConfig.StorageBucket}}">Open
+    in Google Storage</a>
 
-<h2>Upload new file</h2>
+<h3>Upload new file</h3>
 <form method="post" action="/admin/addDistributionFile" enctype="multipart/form-data">
     <input type="hidden" name="Key" value="{{if .Distribution.Key}}{{.Distribution.Key.Encode}}{{end}}">
     <ul>
         <li>FileName: <input type="text" name="FileName"></li>
         <li>ShortLabel: <input type="text" name="ShortLabel"></li>
         <li>File: <input type="file" name="File"></li>
+        <li><input type="submit" value="upload"/></li>
     </ul>
-    <input type="submit" value="submit"/>
 </form>
 
-<h2>Codes</h2>
-<a href="/admin/editDistributionCodes?Key={{if .Distribution.Key}}{{.Distribution.Key.Encode}}{{end}}">Edit Codes</a>
+
+<h2>Generated Codes</h2>
+<h3>Tags</h3>
+<table>
+    <tr>
+        <th>Name</th>
+        <th>IdFormat</th>
+        <th>IdFrom</th>
+        <th>IdTo</th>
+        <th></th>
+    </tr>
+{{range .DistributionGenerationTags}}
+    <tr>
+        <td>{{.Name}}</td>
+        <td>{{.IdFormat}}</td>
+        <td>{{.IdFrom}}</td>
+        <td>{{.IdTo}}</td>
+        <td><a href="/admin/editDistributionCodes?Key={{.Key.Encode}}">Show codes</a></td>
+    </tr>
+{{end}}
+</table>
+
+<h3>Generate new codes</h3>
+<form method="post" action="/admin/generateDistributionCodes" enctype="multipart/form-data">
+    <input type="hidden" name="Key" value="{{if .Distribution.Key}}{{.Distribution.Key.Encode}}{{end}}">
+    <ul>
+        <li>Tag name: <input type="text" name="Name" value="tag">(e.g. "TBF6")</li>
+        <li>Id format: <input type="text" name="IdFormat" value="ID-%05d">(e.g. "TBF6-%05d")</li>
+        <li>Id from: <input type="text" name="IdFrom" value="1"></li>
+        <li>Id from: <input type="text" name="IdTo" value="500"></li>
+    </ul>
+    <input type="submit" value="generate"/>
+</form>
+
+
 {{end}}
 
 </body>

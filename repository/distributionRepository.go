@@ -78,6 +78,45 @@ func FindDistributionCodes(ctx context.Context, parentKey *datastore.Key, withDi
 	return items, err
 }
 
+func FindDistributionCodesByTag(ctx context.Context, tagKey *datastore.Key, withDisabled bool) ([]entity.DistributionCode, error) {
+	var items []entity.DistributionCode
+	q := datastore.NewQuery("DistributionCode").Filter("GenerationTag =", tagKey).Order("IdLabel")
+	if !withDisabled {
+		q = q.Filter("Disabled =", false)
+	}
+	keys, err := q.GetAll(ctx, &items)
+	if err == nil {
+		for i := 0; i < len(keys) && i < len(items); i++ {
+			items[i].Key = keys[i]
+		}
+	}
+	return items, err
+}
+
+func FindDistributionGenerationTag(ctx context.Context, key *datastore.Key) (*entity.DistributionGenerationTag, error) {
+	item := entity.DistributionGenerationTag{}
+	err := datastore.Get(ctx, key, &item)
+	if err == nil {
+		item.Key = key
+	}
+	return &item, err
+}
+
+func FindDistributionGenerationTags(ctx context.Context, parentKey *datastore.Key, withDisabled bool) ([]entity.DistributionGenerationTag, error) {
+	var items []entity.DistributionGenerationTag
+	q := datastore.NewQuery("DistributionGenerationTag").Filter("Parent =", parentKey).Order("Name")
+	if !withDisabled {
+		q = q.Filter("Disabled =", false)
+	}
+	keys, err := q.GetAll(ctx, &items)
+	if err == nil {
+		for i := 0; i < len(keys) && i < len(items); i++ {
+			items[i].Key = keys[i]
+		}
+	}
+	return items, err
+}
+
 func SaveDistribution(ctx context.Context, item *entity.Distribution) (*entity.Distribution, error) {
 	var err error
 	if item.Key == nil {
@@ -123,4 +162,13 @@ func SaveDistributionCodes(ctx context.Context, items *[]entity.DistributionCode
 		return err
 	}
 
+}
+
+func SaveDistributionGenerationTag(ctx context.Context, item *entity.DistributionGenerationTag) (*entity.DistributionGenerationTag, error) {
+	var err error
+	if item.Key == nil {
+		item.Key = datastore.NewIncompleteKey(ctx, "DistributionGenerationTag", item.Parent)
+	}
+	item.Key, err = datastore.Put(ctx, item.Key, item)
+	return item, err
 }

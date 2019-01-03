@@ -26,6 +26,12 @@ indexes:
 - kind: DistributionCode
   properties:
   - name: Disabled
+  - name: GenerationTag
+  - name: IdLabel
+
+- kind: DistributionCode
+  properties:
+  - name: Disabled
   - name: Parent
   - name: IdLabel
 
@@ -51,3 +57,9 @@ indexes:
   properties:
   - name: Parent
   - name: FileName
+
+- kind: DistributionGenerationTag
+  properties:
+  - name: Disabled
+  - name: Parent
+  - name: Name

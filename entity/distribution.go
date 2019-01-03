@@ -24,9 +24,20 @@ type DistributionFile struct {
 }
 
 type DistributionCode struct {
+	Key           *datastore.Key `datastore:"-"`
+	Parent        *datastore.Key
+	GenerationTag *datastore.Key
+	IdLabel       string
+	Count         int
+	Disabled      bool
+}
+
+type DistributionGenerationTag struct {
 	Key      *datastore.Key `datastore:"-"`
 	Parent   *datastore.Key
-	IdLabel  string
-	Count    int
+	Name     string
+	IdFormat string
+	IdFrom   int
+	IdTo     int
 	Disabled bool
 }

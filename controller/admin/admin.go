@@ -24,13 +24,15 @@ const (
 )
 
 type templateParams struct {
-	Notice            string
-	SignedIn          bool
-	Distributions     []entity.Distribution
-	Distribution      *entity.Distribution
-	DistributionFiles []entity.DistributionFile
-	FirebaseConfig    core.FirebaseConfig
-	DistributionCodes []entity.DistributionCode
+	Notice                     string
+	SignedIn                   bool
+	Distributions              []entity.Distribution
+	Distribution               *entity.Distribution
+	DistributionFiles          []entity.DistributionFile
+	FirebaseConfig             core.FirebaseConfig
+	DistributionCodes          []entity.DistributionCode
+	DistributionGenerationTag  *entity.DistributionGenerationTag
+	DistributionGenerationTags []entity.DistributionGenerationTag
 }
 
 func IndexHandler(cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
@@ -135,8 +137,12 @@ func showEditDistribution(ctx *context.Context, cb core.CoreBundle, w http.Respo
 			if files, e3 := repository.FindDistributionFiles(*ctx, k, false); e3 == nil {
 				params.DistributionFiles = files
 			}
+			if tags, e4 := repository.FindDistributionGenerationTags(*ctx, k, false); e4 == nil {
+				params.DistributionGenerationTags = tags
+			}
 		}
 	}
+
 	if params.Distribution == nil {
 		item := entity.Distribution{}
 		params.Distribution = &item
@@ -212,7 +218,7 @@ func addDistributionFile(ctx *context.Context, cb core.CoreBundle, w http.Respon
 	}
 
 	shortLabel := r.FormValue("ShortLabel")
-	distributionFile := entity.DistributionFile{Parent: key, FileName: fileName, Url: url, ShortLabel: shortLabel }
+	distributionFile := entity.DistributionFile{Parent: key, FileName: fileName, Url: url, ShortLabel: shortLabel}
 	if _, err := repository.SaveDistributionFile(*ctx, &distributionFile); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
@@ -257,20 +263,25 @@ func showEditDistributionCodes(ctx *context.Context, cb core.CoreBundle, w http.
 	if k, err := datastore.DecodeKey(r.FormValue("Key")); err != nil {
 		http.Redirect(w, r, PathPrefix, http.StatusFound)
 		return
-	} else if item, e2 := repository.FindDistribution(*ctx, k); e2 != nil {
+	} else if tag, err := repository.FindDistributionGenerationTag(*ctx, k); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
-	} else if files, e3 := repository.FindDistributionFiles(*ctx, k, false); e3 != nil {
+	} else if item, err := repository.FindDistribution(*ctx, tag.Parent); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
-	} else if codes, e4 := repository.FindDistributionCodes(*ctx, k, false); e4 != nil {
+	} else if files, err := repository.FindDistributionFiles(*ctx, item.Key, false); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	} else if codes, err := repository.FindDistributionCodesByTag(*ctx, tag.Key, false); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
 	} else {
 		params.Distribution = item
+		params.DistributionGenerationTag = tag
 		params.DistributionCodes = codes
 		params.DistributionFiles = files
 	}
@@ -311,15 +322,24 @@ func generateDistributionCodes(ctx *context.Context, cb core.CoreBundle, w http.
 	}
 
 	idFormat := r.FormValue("IdFormat")
+	tag := entity.DistributionGenerationTag{
+		Name:     r.FormValue("Name"),
+		Parent:   distribution.Key,
+		IdFormat: idFormat,
+		IdFrom:   idFrom,
+		IdTo:     idTo,
+	}
+	repository.SaveDistributionGenerationTag(*ctx, &tag)
 
 	var distributionCodes []entity.DistributionCode
 	for i := idFrom; i <= idTo; i++ {
 		distributionCodes = append(distributionCodes,
 			entity.DistributionCode{
-				Parent:   distribution.Key,
-				IdLabel:  fmt.Sprintf(idFormat, i),
-				Count:    0,
-				Disabled: false,
+				Parent:        distribution.Key,
+				GenerationTag: tag.Key,
+				IdLabel:       fmt.Sprintf(idFormat, i),
+				Count:         0,
+				Disabled:      false,
 			})
 	}
 	if err := repository.SaveDistributionCodes(*ctx, &distributionCodes); err != nil {

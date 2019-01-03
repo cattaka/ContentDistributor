@@ -8,42 +8,62 @@
 <div class="header">
     <a href="/admin/signInOut">{{ if .SignedIn }}sign in{{ else }}sign out{{ end }}</a>
 </div>
+<div class="navigation">
+    <a href="/admin/">Admin</a>
+    &gt;
+    <a href="/admin/editDistribution?Key={{ .Distribution.Key.Encode }}">Distribution</a>
+    &gt;
+    Codes
+</div>
 
-<h1>ContentDistrbutor editDistributionCodes</h1>
+<h1>Codes</h1>
+<h2>Generation Tag</h2>
+<table>
+    <tr>
+        <th>Name</th>
+        <th>IdFormat</th>
+        <th>IdFrom</th>
+        <th>IdTo</th>
+    </tr>
+{{with .DistributionGenerationTag}}
+    <tr>
+        <td>{{.Name}}</td>
+        <td>{{.IdFormat}}</td>
+        <td>{{.IdFrom}}</td>
+        <td>{{.IdTo}}</td>
+    </tr>
+{{end}}
+</table>
 
-    <h2>Generate new codes</h2>
-    <form method="post" action="/admin/generateDistributionCodes" enctype="multipart/form-data">
-        <input type="hidden" name="Key" value="{{if .Distribution.Key}}{{.Distribution.Key.Encode}}{{end}}">
-        <ul>
-            <li>Id format: <input type="text" name="IdFormat" value="ID-%05d"></li>
-            <li>Id from: <input type="text" name="IdFrom" value="1"></li>
-            <li>Id from: <input type="text" name="IdTo" value="500"></li>
-        </ul>
-        <input type="submit" value="submit"/>
-    </form>
-
-    <h2>Codes</h2>
-    <table>
-    {{ $codes := .DistributionCodes }}
-    {{ $files := .DistributionFiles }}
-    {{ range $code := $codes }}
-        <tr>
-            <td>{{$code.IdLabel}}</td>
-            <td>
-            {{ range $file := $files }}
-                <span><a href="/{{$code.Key.Encode}}/{{$file.FileName}}">{{ $file.FileName }}</a></span>
-            {{ end }}
-            </td>
-            <td>{{$code.Count}}</td>
-            <td>
-                <form style="display: inline" method="post" action="/admin/toggleDistributionCode">
-                    <input type="hidden" name="Disable" value="{{if .Disabled}}true{{else}}false{{end}}">
-                    <input type="submit" value="Toggle">
-                </form>
-            </td>
-        </tr>
-    {{end}}
-    </table>
+<h2>Codes</h2>
+<table>
+{{ $codes := .DistributionCodes }}
+{{ $files := .DistributionFiles }}
+    <tr>
+        <th>IdLabel</th>
+        <th>Files</th>
+        <th>Count</th>
+        <th>Disabled</th>
+    </tr>
+{{ range $code := $codes }}
+    <tr>
+        <td>{{$code.IdLabel}}</td>
+        <td>
+        {{ range $file := $files }}
+            <span><a href="/{{$code.Key.Encode}}/{{$file.FileName}}">{{ $file.FileName }}</a></span>
+        {{ end }}
+        </td>
+        <td>{{$code.Count}}</td>
+        <td>
+            {{.Disabled}}
+            <form style="display: inline" method="post" action="/admin/toggleDistributionCode">
+                <input type="hidden" name="Disable" value="{{if .Disabled}}true{{else}}false{{end}}">
+                <input type="submit" value="Toggle">
+            </form>
+        </td>
+    </tr>
+{{end}}
+</table>
 
 </body>
 </html>

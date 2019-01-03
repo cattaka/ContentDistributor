@@ -8,21 +8,32 @@
 <div class="header">
     <a href="/admin/signInOut">{{ if .SignedIn }}sign out{{ else }}sign in{{ end }}</a>
 </div>
+<div class="navigation">
+    Admin
+</div>
 
 <h1>ContentDistrbutor</h1>
-
+<table>
+    <tr>
+        <th>Title</th>
+        <th>ExpiredAt</th>
+        <th>RealExpiredAt</th>
+        <th>CoverImageUrl</th>
+        <th></th>
+    </tr>
 {{ range .Distributions }}
-<ul>
-    <li><a href="/admin/editDistribution?Key={{ .Key.Encode }}">edit</a></li>
-    <li>{{ .Title }}</li>
-    <li>{{ .ExpiredAt.Format "2006-01-02" }}</li>
-    <li>{{ .RealExpiredAt.Format "2006-01-02" }}</li>
-    <li>{{ .CoverImageUrl }}</li>
-
-</ul>
+    <tr>
+        <td>{{ .Title }}</td>
+        <td>{{ .ExpiredAt.Format "2006-01-02" }}</td>
+        <td>{{ .RealExpiredAt.Format "2006-01-02" }}</td>
+        <td>{{ .CoverImageUrl }}</td>
+        <td><a href="/admin/editDistribution?Key={{ .Key.Encode }}">Show</a></td>
+    </tr>
 {{ end }}
-
-<a href="/admin/editDistribution">Create Distribution</a>
+    <tr>
+        <td colspan="5"><a href="/admin/editDistribution">Create Distribution</a></td>
+    </tr>
+</table>
 
 </body>
 </html>
