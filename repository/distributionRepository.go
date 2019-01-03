@@ -25,9 +25,16 @@ func FindDistribution(ctx context.Context, key *datastore.Key) (*entity.Distribu
 	return &item, err
 }
 
+func FindDistributionFile(ctx context.Context, key *datastore.Key) (*entity.DistributionFile, error) {
+	item := entity.DistributionFile{}
+	err := datastore.Get(ctx, key, &item)
+	if err == nil { item.Key = key }
+	return &item, err
+}
+
 func FindDistributionFiles(ctx context.Context, parentKey *datastore.Key) ([]entity.DistributionFile, error) {
 	var items []entity.DistributionFile
-	q := datastore.NewQuery("DistributionFile").Filter("parentKey =", parentKey).Order("FileName")
+	q := datastore.NewQuery("DistributionFile").Filter("Parent =", parentKey).Order("FileName")
 	keys, err := q.GetAll(ctx, &items)
 	if err == nil {
 		for i := 0; i< len(keys) && i< len(items);i++ {
@@ -37,9 +44,16 @@ func FindDistributionFiles(ctx context.Context, parentKey *datastore.Key) ([]ent
 	return items, err
 }
 
+func FindDistributionCode(ctx context.Context, key *datastore.Key) (*entity.DistributionCode, error) {
+	item := entity.DistributionCode{}
+	err := datastore.Get(ctx, key, &item)
+	if err == nil { item.Key = key }
+	return &item, err
+}
+
 func FindDistributionCodes(ctx context.Context, parentKey *datastore.Key) ([]entity.DistributionCode, error) {
 	var items []entity.DistributionCode
-	q := datastore.NewQuery("DistributionCode").Filter("parentKey =", parentKey).Order("IndexId")
+	q := datastore.NewQuery("DistributionCode").Filter("Parent =", parentKey).Order("IndexId")
 	keys, err := q.GetAll(ctx, &items)
 	if err == nil {
 		for i := 0; i< len(keys) && i< len(items);i++ {
@@ -61,7 +75,7 @@ func SaveDistribution(ctx context.Context, item *entity.Distribution) (*entity.D
 func SaveDistributionFile(ctx context.Context, item *entity.DistributionFile) (*entity.DistributionFile, error) {
 	var err error
 	if item.Key == nil {
-		item.Key = datastore.NewIncompleteKey(ctx, "DistributionFile", nil)
+		item.Key = datastore.NewIncompleteKey(ctx, "DistributionFile", item.Parent)
 	}
 	item.Key, err = datastore.Put(ctx, item.Key, item)
 	return item, err
@@ -70,7 +84,7 @@ func SaveDistributionFile(ctx context.Context, item *entity.DistributionFile) (*
 func SaveDistributionCode(ctx context.Context, item *entity.DistributionCode) (*entity.DistributionCode, error) {
 	var err error
 	if item.Key == nil {
-		item.Key = datastore.NewIncompleteKey(ctx, "DistributionCode", nil)
+		item.Key = datastore.NewIncompleteKey(ctx, "DistributionCode", item.Parent)
 	}
 	item.Key, err = datastore.Put(ctx, item.Key, item)
 	return item, err

@@ -49,7 +49,9 @@ func IndexHandler(cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
 	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"editDistribution" {
 		postEditDistribution(&ctx, cb, w, r)
 	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"addDistributionFile" {
-		postDistributionFile(&ctx, cb, w, r)
+		addDistributionFile(&ctx, cb, w, r)
+	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"deleteDistributionFile" {
+		deleteDistributionFile(&ctx, cb, w, r)
 	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"signIn" {
 		signIn(&ctx, cb, w, r)
 	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"signOut" {
@@ -159,7 +161,7 @@ func postEditDistribution(ctx *context.Context, cb core.CoreBundle, w http.Respo
 	http.Redirect(w, r, fmt.Sprintf("%seditDistribution?Key=%s", PathPrefix, item.Key.Encode()), http.StatusFound)
 }
 
-func postDistributionFile(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
+func addDistributionFile(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
 	if _, found := cb.Session.Values[KeyAuthToken]; !found {
 		http.Redirect(w, r, PathPrefix, http.StatusFound)
 		return
@@ -210,4 +212,28 @@ func postDistributionFile(ctx *context.Context, cb core.CoreBundle, w http.Respo
 	}
 
 	http.Redirect(w, r, fmt.Sprintf("%seditDistribution?Key=%s", PathPrefix, key.Encode()), http.StatusFound)
+}
+
+func deleteDistributionFile(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
+	var df *entity.DistributionFile
+	if k, err := datastore.DecodeKey(r.FormValue("Key")); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	} else if i, err := repository.FindDistributionFile(*ctx, k); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	} else {
+		df = i
+	}
+
+	df.Disabled = true
+	if _,err := repository.SaveDistributionFile(*ctx, df); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("%seditDistribution?Key=%s", PathPrefix, df.Parent.Encode()), http.StatusFound)
 }
