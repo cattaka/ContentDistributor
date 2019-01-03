@@ -31,7 +31,8 @@
 <ul>
 {{ range .DistributionFiles }}
     <li>
-        <a href="{{.Url}}">{{.FileName}}</a>
+        <span>{{.FileName}}</span>
+        <span>{{.ShortLabel}}</span>
         <form style="display: inline" method="post" action="/admin/deleteDistributionFile">
             <input type="hidden" name="Key" value="{{.Key.Encode}}">
             <input type="submit" value="Delete">
@@ -46,6 +47,7 @@
     <input type="hidden" name="Key" value="{{if .Distribution.Key}}{{.Distribution.Key.Encode}}{{end}}">
     <ul>
         <li>FileName: <input type="text" name="FileName"></li>
+        <li>ShortLabel: <input type="text" name="ShortLabel"></li>
         <li>File: <input type="file" name="File"></li>
     </ul>
     <input type="submit" value="submit"/>

@@ -15,11 +15,12 @@ type Distribution struct {
 }
 
 type DistributionFile struct {
-	Key      *datastore.Key `datastore:"-"`
-	Parent   *datastore.Key
-	FileName string
-	Url      string
-	Disabled bool
+	Key        *datastore.Key `datastore:"-"`
+	Parent     *datastore.Key
+	FileName   string
+	ShortLabel string
+	Url        string
+	Disabled   bool
 }
 
 type DistributionCode struct {

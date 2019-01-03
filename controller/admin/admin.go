@@ -211,7 +211,8 @@ func addDistributionFile(ctx *context.Context, cb core.CoreBundle, w http.Respon
 		url = u
 	}
 
-	distributionFile := entity.DistributionFile{Parent: key, FileName: fileName, Url: url}
+	shortLabel := r.FormValue("ShortLabel")
+	distributionFile := entity.DistributionFile{Parent: key, FileName: fileName, Url: url, ShortLabel: shortLabel }
 	if _, err := repository.SaveDistributionFile(*ctx, &distributionFile); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
