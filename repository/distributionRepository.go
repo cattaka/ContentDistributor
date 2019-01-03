@@ -6,9 +6,12 @@ import (
 	"google.golang.org/appengine/datastore"
 )
 
-func FindDistributionsAll(ctx context.Context) ([]entity.Distribution, error) {
+func FindDistributionsAll(ctx context.Context, withDisabled bool) ([]entity.Distribution, error) {
 	var items []entity.Distribution
 	q := datastore.NewQuery("Distribution").Order("-ExpiredAt").Order("Title")
+	if !withDisabled {
+		q = q.Filter("Disabled =", false)
+	}
 	keys, err := q.GetAll(ctx, &items)
 	if err == nil {
 		for i := 0; i< len(keys) && i< len(items);i++ {
@@ -32,9 +35,12 @@ func FindDistributionFile(ctx context.Context, key *datastore.Key) (*entity.Dist
 	return &item, err
 }
 
-func FindDistributionFiles(ctx context.Context, parentKey *datastore.Key) ([]entity.DistributionFile, error) {
+func FindDistributionFiles(ctx context.Context, parentKey *datastore.Key, withDisabled bool) ([]entity.DistributionFile, error) {
 	var items []entity.DistributionFile
 	q := datastore.NewQuery("DistributionFile").Filter("Parent =", parentKey).Order("FileName")
+	if !withDisabled {
+		q = q.Filter("Disabled =", false)
+	}
 	keys, err := q.GetAll(ctx, &items)
 	if err == nil {
 		for i := 0; i< len(keys) && i< len(items);i++ {
@@ -51,9 +57,12 @@ func FindDistributionCode(ctx context.Context, key *datastore.Key) (*entity.Dist
 	return &item, err
 }
 
-func FindDistributionCodes(ctx context.Context, parentKey *datastore.Key) ([]entity.DistributionCode, error) {
+func FindDistributionCodes(ctx context.Context, parentKey *datastore.Key, withDisabled bool) ([]entity.DistributionCode, error) {
 	var items []entity.DistributionCode
 	q := datastore.NewQuery("DistributionCode").Filter("Parent =", parentKey).Order("IndexId")
+	if !withDisabled {
+		q = q.Filter("Disabled =", false)
+	}
 	keys, err := q.GetAll(ctx, &items)
 	if err == nil {
 		for i := 0; i< len(keys) && i< len(items);i++ {

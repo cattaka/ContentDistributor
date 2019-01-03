@@ -18,5 +18,17 @@ indexes:
 
 - kind: DistributionFile
   properties:
+  - name: Deleted
+  - name: Parent
+  - name: FileName
+
+- kind: DistributionFile
+  properties:
+  - name: Disabled
+  - name: Parent
+  - name: FileName
+
+- kind: DistributionFile
+  properties:
   - name: Parent
   - name: FileName

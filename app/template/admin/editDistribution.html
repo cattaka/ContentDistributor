@@ -11,6 +11,7 @@
 
 <h1>ContentDistrbutor editDistribution</h1>
 
+<h2>Basic info</h2>
 {{ with .Distribution }}
 <form method="post" action="/admin/editDistribution">
     <input type="hidden" name="Key" value="{{if .Key}}{{.Key.Encode}}{{end}}">
@@ -38,7 +39,7 @@
     {{end}}
     </ul>
 
-    <h2>Upload file</h2>
+    <h2>Upload new file</h2>
     <form method="post" action="/admin/addDistributionFile" enctype="multipart/form-data">
         <input type="hidden" name="Key" value="{{if .Distribution.Key}}{{.Distribution.Key.Encode}}{{end}}">
         <ul>

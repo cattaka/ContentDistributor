@@ -63,7 +63,7 @@ func showIndex(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, 
 	params := templateParams{}
 	if _, found := cb.Session.Values[KeyAuthToken]; found {
 		params.SignedIn = true
-		params.Distributions, _ = repository.FindDistributionsAll(*ctx)
+		params.Distributions, _ = repository.FindDistributionsAll(*ctx, false)
 	}
 
 	htmlTemplate := template.Must(template.ParseFiles("template/admin/index.html"))
@@ -125,7 +125,7 @@ func showEditDistribution(ctx *context.Context, cb core.CoreBundle, w http.Respo
 	if k, err := datastore.DecodeKey(r.FormValue("Key")); err == nil {
 		if item, e2 := repository.FindDistribution(*ctx, k); e2 == nil {
 			params.Distribution = item
-			if files, e3 := repository.FindDistributionFiles(*ctx, k); e3 == nil {
+			if files, e3 := repository.FindDistributionFiles(*ctx, k, false); e3 == nil {
 				params.DistributionFiles = files
 			}
 		}
