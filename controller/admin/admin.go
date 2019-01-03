@@ -5,13 +5,15 @@ import (
 	"html/template"
 	"google.golang.org/appengine"
 	"github.com/cattaka/ContentDistributor/core"
-	"firebase.google.com/go"
 	"context"
 	"github.com/cattaka/ContentDistributor/entity"
 	"github.com/cattaka/ContentDistributor/repository"
 	"google.golang.org/appengine/datastore"
 	"time"
 	"fmt"
+	"firebase.google.com/go"
+	"github.com/cattaka/ContentDistributor/util"
+	"regexp"
 )
 
 const (
@@ -46,7 +48,7 @@ func IndexHandler(cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
 		showEditDistribution(&ctx, cb, w, r)
 	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"editDistribution" {
 		postEditDistribution(&ctx, cb, w, r)
-	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"postDistributionFile" {
+	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"addDistributionFile" {
 		postDistributionFile(&ctx, cb, w, r)
 	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"signIn" {
 		signIn(&ctx, cb, w, r)
@@ -150,11 +152,11 @@ func postEditDistribution(ctx *context.Context, cb core.CoreBundle, w http.Respo
 		Title:         r.FormValue("Title"),
 		ExpiredAt:     expiredAt,
 		RealExpiredAt: realExpiredAt,
-		CoverImageURL: r.FormValue("CoverImageURL"),
+		CoverImageUrl: r.FormValue("CoverImageUrl"),
 	}
 	repository.SaveDistribution(*ctx, &item)
 
-	http.Redirect(w, r, fmt.Sprintf("%seditDistribution?Key=%s", PathPrefix, k.Encode()), http.StatusFound)
+	http.Redirect(w, r, fmt.Sprintf("%seditDistribution?Key=%s", PathPrefix, item.Key.Encode()), http.StatusFound)
 }
 
 func postDistributionFile(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
@@ -163,8 +165,49 @@ func postDistributionFile(ctx *context.Context, cb core.CoreBundle, w http.Respo
 		return
 	}
 
-	k, _ := datastore.DecodeKey(r.FormValue("Key"))
-	// TODO
+	var key *datastore.Key
+	if k, err := datastore.DecodeKey(r.FormValue("Key")); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	} else if _, err := repository.FindDistribution(*ctx, k); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	} else {
+		key = k
+	}
 
-	http.Redirect(w, r, fmt.Sprintf("%seditDistribution?Key=%s", PathPrefix, k.Encode()), http.StatusFound)
+	fileNameRegex := "^[a-zA-Z0-9][a-zA-Z0-9\\-_\\.]*$"
+	fileName := r.FormValue("FileName")
+	rg := regexp.MustCompile(fileNameRegex)
+	if !rg.Match([]byte(fileName)) {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("file name must match `%s`", fileNameRegex)))
+		return
+	}
+
+	fileFullPath := fmt.Sprintf("o/%s/%s", key.Encode(), fileName)
+
+	var url string
+	if f, fh, err := r.FormFile("File"); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	} else if u, err := storageUtil.UploadFile(*ctx, cb, f, fh, fileFullPath, false); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	} else {
+		url = u
+	}
+
+	distributionFile := entity.DistributionFile{ Parent:   key, FileName: fileName, Url: url }
+	if _, err := repository.SaveDistributionFile(*ctx, &distributionFile); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("%seditDistribution?Key=%s", PathPrefix, key.Encode()), http.StatusFound)
 }

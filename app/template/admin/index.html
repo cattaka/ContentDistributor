@@ -13,11 +13,11 @@
 
 {{ range .Distributions }}
 <ul>
-    <li>{{ .Key.Encode }}</li>
+    <li><a href="/admin/editDistribution?Key={{ .Key.Encode }}">edit</a></li>
     <li>{{ .Title }}</li>
     <li>{{ .ExpiredAt.Format "2006-01-02" }}</li>
     <li>{{ .RealExpiredAt.Format "2006-01-02" }}</li>
-    <li>{{ .CoverImageURL }}</li>
+    <li>{{ .CoverImageUrl }}</li>
 
 </ul>
 {{ end }}

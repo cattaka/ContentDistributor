@@ -10,13 +10,14 @@ type Distribution struct {
 	Title string
 	ExpiredAt     time.Time
 	RealExpiredAt time.Time
-	CoverImageURL string
+	CoverImageUrl string
 }
 
 type DistributionFile struct {
 	Key      *datastore.Key `datastore:""`
 	Parent   *datastore.Key
 	FileName string
+	Url string
 }
 
 type DistributionCode struct {
