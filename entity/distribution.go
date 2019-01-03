@@ -24,9 +24,8 @@ type DistributionFile struct {
 
 type DistributionCode struct {
 	Key      *datastore.Key `datastore:"-"`
-	IndexId  string
 	Parent   *datastore.Key
-	Code     string
+	IdLabel  string
 	Count    int
 	Disabled bool
 }

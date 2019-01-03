@@ -14,6 +14,7 @@ import (
 	"firebase.google.com/go"
 	"github.com/cattaka/ContentDistributor/util"
 	"regexp"
+	"strconv"
 )
 
 const (
@@ -209,7 +210,7 @@ func addDistributionFile(ctx *context.Context, cb core.CoreBundle, w http.Respon
 		url = u
 	}
 
-	distributionFile := entity.DistributionFile{ Parent:   key, FileName: fileName, Url: url }
+	distributionFile := entity.DistributionFile{Parent: key, FileName: fileName, Url: url}
 	if _, err := repository.SaveDistributionFile(*ctx, &distributionFile); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
@@ -234,7 +235,7 @@ func deleteDistributionFile(ctx *context.Context, cb core.CoreBundle, w http.Res
 	}
 
 	df.Disabled = true
-	if _,err := repository.SaveDistributionFile(*ctx, df); err != nil {
+	if _, err := repository.SaveDistributionFile(*ctx, df); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
@@ -267,5 +268,53 @@ func showEditDistributionCodes(ctx *context.Context, cb core.CoreBundle, w http.
 }
 
 func generateDistributionCodes(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
-	// TODO
+	if _, found := cb.Session.Values[KeyAuthToken]; !found {
+		http.Redirect(w, r, PathPrefix, http.StatusFound)
+		return
+	}
+
+	var distribution *entity.Distribution
+	if k, err := datastore.DecodeKey(r.FormValue("Key")); err != nil {
+		http.Redirect(w, r, PathPrefix, http.StatusFound)
+		return
+	} else if item, e2 := repository.FindDistribution(*ctx, k); e2 != nil {
+		http.Redirect(w, r, PathPrefix, http.StatusFound)
+		return
+	} else {
+		distribution = item
+	}
+
+	var idFrom, idTo int
+	if i, err := strconv.Atoi(r.FormValue("IdFrom")); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	} else if j, err := strconv.Atoi(r.FormValue("IdTo")); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	} else {
+		idFrom = i
+		idTo = j
+	}
+
+	idFormat := r.FormValue("IdFormat")
+
+	var distributionCodes []entity.DistributionCode
+	for i := idFrom; i <= idTo; i++ {
+		distributionCodes = append(distributionCodes,
+			entity.DistributionCode{
+				Parent:   distribution.Key,
+				IdLabel:  fmt.Sprintf(idFormat, i),
+				Count:    0,
+				Disabled: false,
+			})
+	}
+	if err := repository.SaveDistributionCodes(*ctx, &distributionCodes) ; err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("%seditDistributionCodes?Key=%s", PathPrefix, distribution.Key.Encode()), http.StatusFound)
 }
