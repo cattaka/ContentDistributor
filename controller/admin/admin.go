@@ -126,6 +126,7 @@ func showEditDistribution(ctx *context.Context, cb core.CoreBundle, w http.Respo
 		http.Redirect(w, r, PathPrefix, http.StatusFound)
 		return
 	}
+	params.FirebaseConfig = *cb.FirebaseConfig
 	params.SignedIn = true
 
 	if k, err := datastore.DecodeKey(r.FormValue("Key")); err == nil {

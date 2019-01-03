@@ -12,6 +12,7 @@
 <h1>ContentDistrbutor editDistribution</h1>
 
 <h2>Basic info</h2>
+{{ $firebaseConfig := .FirebaseConfig }}
 {{ with .Distribution }}
 <form method="post" action="/admin/editDistribution">
     <input type="hidden" name="Key" value="{{if .Key}}{{.Key.Encode}}{{end}}">
@@ -38,6 +39,7 @@
     </li>
 {{end}}
 </ul>
+<a href="https://console.cloud.google.com/storage/browser/{{$firebaseConfig.StorageBucket}}/o/{{.Distribution.Key.Encode}}/?project={{$firebaseConfig.StorageBucket}}">Open in Google Storage</a>
 
 <h2>Upload new file</h2>
 <form method="post" action="/admin/addDistributionFile" enctype="multipart/form-data">
