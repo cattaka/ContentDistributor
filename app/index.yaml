@@ -18,5 +18,5 @@ indexes:
 
 - kind: DistributionFile
   properties:
-  - name: parentKey
+  - name: Parent
   - name: FileName

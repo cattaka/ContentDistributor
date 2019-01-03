@@ -26,10 +26,19 @@
 
 {{if .Distribution.Key}}
     <h2>Files</h2>
+    <ul>
     {{ range .DistributionFiles }}
-        TODO
+        <li>
+            <a href="{{.Url}}">{{.FileName}}</a>
+            <form style="display: inline" method="post" action="/admin/deleteDistributionFile">
+                <input type="hidden" name="Key" value="{{.Key.Encode}}">
+                <input type="submit" value="Delete">
+            </form>
+        </li>
     {{end}}
+    </ul>
 
+    <h2>Upload file</h2>
     <form method="post" action="/admin/addDistributionFile" enctype="multipart/form-data">
         <input type="hidden" name="Key" value="{{if .Distribution.Key}}{{.Distribution.Key.Encode}}{{end}}">
         <ul>
