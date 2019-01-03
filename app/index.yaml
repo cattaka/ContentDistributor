@@ -12,9 +12,22 @@ indexes:
 
 - kind: Distribution
   properties:
+  - name: Disabled
   - name: ExpiredAt
     direction: desc
   - name: Title
+
+- kind: Distribution
+  properties:
+  - name: ExpiredAt
+    direction: desc
+  - name: Title
+
+- kind: DistributionCode
+  properties:
+  - name: Disabled
+  - name: Parent
+  - name: IndexId
 
 - kind: DistributionFile
   properties:

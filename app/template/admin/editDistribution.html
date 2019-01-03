@@ -6,7 +6,7 @@
 </head>
 <body>
 <div class="header">
-    <a href="/admin/signInOut">{{ if .SignedIn }}sign in{{ else }}sign out{{ end }}</a>
+    <a href="/admin/signInOut">{{ if .SignedIn }}sign out{{ else }}sign in{{ end }}</a>
 </div>
 
 <h1>ContentDistrbutor editDistribution</h1>
@@ -26,28 +26,31 @@
 {{ end }}
 
 {{if .Distribution.Key}}
-    <h2>Files</h2>
-    <ul>
-    {{ range .DistributionFiles }}
-        <li>
-            <a href="{{.Url}}">{{.FileName}}</a>
-            <form style="display: inline" method="post" action="/admin/deleteDistributionFile">
-                <input type="hidden" name="Key" value="{{.Key.Encode}}">
-                <input type="submit" value="Delete">
-            </form>
-        </li>
-    {{end}}
-    </ul>
+<h2>Files</h2>
+<ul>
+{{ range .DistributionFiles }}
+    <li>
+        <a href="{{.Url}}">{{.FileName}}</a>
+        <form style="display: inline" method="post" action="/admin/deleteDistributionFile">
+            <input type="hidden" name="Key" value="{{.Key.Encode}}">
+            <input type="submit" value="Delete">
+        </form>
+    </li>
+{{end}}
+</ul>
 
-    <h2>Upload new file</h2>
-    <form method="post" action="/admin/addDistributionFile" enctype="multipart/form-data">
-        <input type="hidden" name="Key" value="{{if .Distribution.Key}}{{.Distribution.Key.Encode}}{{end}}">
-        <ul>
-            <li>FileName: <input type="text" name="FileName"></li>
-            <li>File: <input type="file" name="File"></li>
-        </ul>
-        <input type="submit" value="submit"/>
-    </form>
+<h2>Upload new file</h2>
+<form method="post" action="/admin/addDistributionFile" enctype="multipart/form-data">
+    <input type="hidden" name="Key" value="{{if .Distribution.Key}}{{.Distribution.Key.Encode}}{{end}}">
+    <ul>
+        <li>FileName: <input type="text" name="FileName"></li>
+        <li>File: <input type="file" name="File"></li>
+    </ul>
+    <input type="submit" value="submit"/>
+</form>
+
+<h2>Codes</h2>
+<a href="/admin/editDistributionCodes?Key={{if .Distribution.Key}}{{.Distribution.Key.Encode}}{{end}}">Edit Codes</a>
 {{end}}
 
 </body>

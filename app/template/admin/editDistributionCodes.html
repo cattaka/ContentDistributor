@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+    <title>ContentDistrbutor</title>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+</head>
+<body>
+<div class="header">
+    <a href="/admin/signInOut">{{ if .SignedIn }}sign in{{ else }}sign out{{ end }}</a>
+</div>
+
+<h1>ContentDistrbutor editDistributionCodes</h1>
+
+    <h2>Generate new codes</h2>
+    <form method="post" action="/admin/generateDistributionCodes" enctype="multipart/form-data">
+        <input type="hidden" name="Key" value="{{if .Distribution.Key}}{{.Distribution.Key.Encode}}{{end}}">
+        <ul>
+            <li>Id format: <input type="text" name="ID-%04d"></li>
+            <li>Id from: <input type="text" name="1"></li>
+            <li>Id from: <input type="text" name="500"></li>
+        </ul>
+        <input type="submit" value="submit"/>
+    </form>
+
+    <h2>Codes</h2>
+    <ul>
+    {{ range .DistributionCodes }}
+        <li>
+            <a href="{{.Url}}">{{.IndexId}}</a>
+            <form style="display: inline" method="post" action="/admin/toggleDistributionCode">
+                <input type="hidden" name="Disable" value="{{if .Disabled}}true{{else}}false{{end}}">
+                <input type="submit" value="Toggle">
+            </form>
+        </li>
+    {{end}}
+    </ul>
+
+</body>
+</html>

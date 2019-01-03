@@ -29,6 +29,7 @@ type templateParams struct {
 	Distribution      *entity.Distribution
 	DistributionFiles []entity.DistributionFile
 	FirebaseConfig    core.FirebaseConfig
+	DistributionCodes []entity.DistributionCode
 }
 
 func IndexHandler(cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
@@ -52,6 +53,10 @@ func IndexHandler(cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
 		addDistributionFile(&ctx, cb, w, r)
 	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"deleteDistributionFile" {
 		deleteDistributionFile(&ctx, cb, w, r)
+	} else if r.Method == "GET" && r.URL.Path == PathPrefix+"editDistributionCodes" {
+		showEditDistributionCodes(&ctx, cb, w, r)
+	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"generateDistributionCodes" {
+		generateDistributionCodes(&ctx, cb, w, r)
 	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"signIn" {
 		signIn(&ctx, cb, w, r)
 	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"signOut" {
@@ -236,4 +241,31 @@ func deleteDistributionFile(ctx *context.Context, cb core.CoreBundle, w http.Res
 	}
 
 	http.Redirect(w, r, fmt.Sprintf("%seditDistribution?Key=%s", PathPrefix, df.Parent.Encode()), http.StatusFound)
+}
+
+func showEditDistributionCodes(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
+	params := templateParams{}
+	if _, found := cb.Session.Values[KeyAuthToken]; !found {
+		http.Redirect(w, r, PathPrefix, http.StatusFound)
+		return
+	}
+	params.SignedIn = true
+
+	if k, err := datastore.DecodeKey(r.FormValue("Key")); err != nil {
+		http.Redirect(w, r, PathPrefix, http.StatusFound)
+		return
+	} else if item, e2 := repository.FindDistribution(*ctx, k); e2 != nil {
+		http.Redirect(w, r, PathPrefix, http.StatusFound)
+		return
+	} else if codes, e3 := repository.FindDistributionCodes(*ctx, k, false); e3 == nil {
+		params.Distribution = item
+		params.DistributionCodes = codes
+	}
+
+	htmlTemplate := template.Must(template.ParseFiles("template/admin/editDistributionCodes.html"))
+	htmlTemplate.Execute(w, params)
+}
+
+func generateDistributionCodes(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
+	// TODO
 }
