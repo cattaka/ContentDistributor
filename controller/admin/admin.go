@@ -485,7 +485,7 @@ func downloadDistributionCodes(ctx *context.Context, cb core.CoreBundle, w http.
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 	} else {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusOK)
 		w.Write(bytes)
 	}
 }
