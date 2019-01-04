@@ -32,6 +32,14 @@
 {{ end }}
 
 {{if .Distribution.Key}}
+<h2>Cover image</h2>
+<h3>Update cover image</h3>
+<form method="post" action="/admin/updateDistributionCoverImage" enctype="multipart/form-data">
+    <input type="hidden" name="Key" value="{{.Distribution.Key.Encode}}">
+    <li>ImageFile: <input type="file" name="ImageFile"></li>
+    <input type="submit" value="Upload">
+</form>
+
 <h2>Distribution Files</h2>
 <h3>File list</h3>
 <table>

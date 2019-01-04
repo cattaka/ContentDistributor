@@ -52,6 +52,8 @@ func IndexHandler(cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
 		showEditDistribution(&ctx, cb, w, r)
 	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"editDistribution" {
 		postEditDistribution(&ctx, cb, w, r)
+	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"updateDistributionCoverImage" {
+		updateDistributionCoverImage(&ctx, cb, w, r)
 	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"addDistributionFile" {
 		addDistributionFile(&ctx, cb, w, r)
 	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"deleteDistributionFile" {
@@ -172,6 +174,46 @@ func postEditDistribution(ctx *context.Context, cb core.CoreBundle, w http.Respo
 	repository.SaveDistribution(*ctx, &item)
 
 	http.Redirect(w, r, fmt.Sprintf("%seditDistribution?Key=%s", PathPrefix, item.Key.Encode()), http.StatusFound)
+}
+
+func updateDistributionCoverImage(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
+	if _, found := cb.Session.Values[KeyAuthToken]; !found {
+		http.Redirect(w, r, PathPrefix, http.StatusFound)
+		return
+	}
+
+	var distribution *entity.Distribution
+	if k, err := datastore.DecodeKey(r.FormValue("Key")); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	} else if d, err := repository.FindDistribution(*ctx, k); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	} else {
+		distribution = d
+	}
+
+	fileFullPath := fmt.Sprintf("meta/%s/%s", distribution.Key.Encode(), "cover")
+
+	var url string
+	if f, fh, err := r.FormFile("ImageFile"); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	} else if u, err := storageUtil.UploadFile(*ctx, cb, f, fh, fileFullPath, true); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	} else {
+		url = u
+	}
+
+	distribution.CoverImageUrl = url
+	repository.SaveDistribution(*ctx, distribution)
+
+	http.Redirect(w, r, fmt.Sprintf("%seditDistribution?Key=%s", PathPrefix, distribution.Key.Encode()), http.StatusFound)
 }
 
 func addDistributionFile(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
