@@ -485,6 +485,9 @@ func downloadDistributionCodes(ctx *context.Context, cb core.CoreBundle, w http.
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 	} else {
+		var contentDisposition = fmt.Sprintf("attachment; filename=\"%s.json\"", params.Distribution.Title)
+		w.Header().Add("Content-Type", "application/json")
+		w.Header().Add("Content-Disposition", contentDisposition)
 		w.WriteHeader(http.StatusOK)
 		w.Write(bytes)
 	}
