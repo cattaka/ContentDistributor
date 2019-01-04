@@ -117,6 +117,6 @@ func download(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, r
 	code.Count++
 	repository.SaveDistributionCode(*ctx, code)
 
-	http.Redirect(w, r, fmt.Sprintf(storageUtil.STORAGE_URL_FORMAT, cb.FirebaseConfig.StorageBucket, downloadFileFullPath), http.StatusFound)
+	http.Redirect(w, r, fmt.Sprintf(util.STORAGE_URL_FORMAT, cb.FirebaseConfig.StorageBucket, downloadFileFullPath), http.StatusFound)
 	return true
 }

@@ -202,7 +202,7 @@ func updateDistributionCoverImage(ctx *context.Context, cb core.CoreBundle, w ht
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
-	} else if u, err := storageUtil.UploadFile(*ctx, cb, f, fh, fileFullPath, true); err != nil {
+	} else if u, err := util.UploadFile(*ctx, cb, f, fh, fileFullPath, true); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
@@ -251,7 +251,7 @@ func addDistributionFile(ctx *context.Context, cb core.CoreBundle, w http.Respon
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
-	} else if u, err := storageUtil.UploadFile(*ctx, cb, f, fh, fileFullPath, false); err != nil {
+	} else if u, err := util.UploadFile(*ctx, cb, f, fh, fileFullPath, false); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return

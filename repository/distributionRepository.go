@@ -63,6 +63,18 @@ func FindDistributionCode(ctx context.Context, key *datastore.Key) (*entity.Dist
 	return &item, err
 }
 
+func FindDistributionCodeByCode(ctx context.Context, code string) ([]entity.DistributionCode, error) {
+	var items []entity.DistributionCode
+	q := datastore.NewQuery("DistributionCode").Filter("Code =", code).Order("IdLabel")
+	keys, err := q.GetAll(ctx, &items)
+	if err == nil {
+		for i := 0; i < len(keys) && i < len(items); i++ {
+			items[i].Key = keys[i]
+		}
+	}
+	return items, err
+}
+
 func FindDistributionCodes(ctx context.Context, parentKey *datastore.Key, withDisabled bool) ([]entity.DistributionCode, error) {
 	var items []entity.DistributionCode
 	q := datastore.NewQuery("DistributionCode").Filter("Parent =", parentKey).Order("IdLabel")
