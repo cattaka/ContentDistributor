@@ -25,7 +25,10 @@
         <li>Title: <input type="text" name="Title" value="{{.Title}}"></li>
         <li>ExpiredAt: <input type="date" name="ExpiredAt" value="{{.ExpiredAt.Format "2006-01-02"}}"></li>
         <li>RealExpiredAt: <input type="date" name="RealExpiredAt" value="{{.RealExpiredAt.Format "2006-01-02"}}"></li>
-        <li>CoverImageUrl: <input type="text" name="CoverImageUrl" value="{{.CoverImageUrl}}"></li>
+        <li>
+            CoverImageUrl: <input type="text" name="CoverImageUrl" value="{{.CoverImageUrl}}">
+            <a href="{{.CoverImageUrl}}" target="_blank"><img src="{{.CoverImageUrl}}" width="48pt"></a>
+        </li>
         <li><input type="submit" value="Update"/></li>
     </ul>
 </form>
@@ -36,8 +39,10 @@
 <h3>Update cover image</h3>
 <form method="post" action="/admin/updateDistributionCoverImage" enctype="multipart/form-data">
     <input type="hidden" name="Key" value="{{.Distribution.Key.Encode}}">
-    <li>ImageFile: <input type="file" name="ImageFile"></li>
-    <input type="submit" value="Upload">
+    <ul>
+        <li>ImageFile: <input type="file" name="ImageFile"></li>
+        <li><input type="submit" value="Upload"></li>
+    </ul>
 </form>
 
 <h2>Distribution Files</h2>
