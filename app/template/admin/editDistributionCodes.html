@@ -37,7 +37,11 @@
 
 <h2>Codes</h2>
 
-<a href="/admin/downloadDistributionCodes?Key={{.DistributionGenerationTag.Key.Encode}}">Download json</a>
+<ul>
+    <li><a href="/admin/downloadDistributionCodes?Key={{.DistributionGenerationTag.Key.Encode}}">Download json</a></li>
+    <li><a href="/static/pdf_generator/51678.html" target="_blank">Open util for 51678</a></li>
+</ul>
+
 
 <table>
 {{ $codes := .DistributionCodes }}

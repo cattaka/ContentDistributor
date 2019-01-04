@@ -26,7 +26,7 @@
         <td>{{ .Title }}</td>
         <td>{{ .ExpiredAt.Format "2006-01-02" }}</td>
         <td>{{ .RealExpiredAt.Format "2006-01-02" }}</td>
-        <td>{{ .CoverImageUrl }}</td>
+        <td><a href="{{.CoverImageUrl}}" target="_blank"><img src="{{.CoverImageUrl}}" width="48pt"></a></td>
         <td><a href="/admin/editDistribution?Key={{ .Key.Encode }}">Show</a></td>
     </tr>
 {{ end }}

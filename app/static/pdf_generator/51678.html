@@ -1,0 +1,183 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<link rel="stylesheet" type="text/css" href="51678.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.1/qrcode.min.js"></script>
+
+<script>
+
+// サイズ情報 https://www.a-one.co.jp/product/search/detail.php?id=51678
+const paper_width = 210;
+const paper_height = 297;
+const horizontalMargin = 12;
+const verticalMargin = 7;
+const sheetPaddingWidth = 0;
+const sheetPaddingHeight = 0;
+const sheetWidth = 91;
+const sheetHeight = 55;
+const sheetHorizontalMargin = 4;
+const sheetVerticalMargin = 2;
+const numberOfColumns = 2;
+const numberOfRows = 5;
+
+const svgNS = "http://www.w3.org/2000/svg";
+const xlinkNS = "http://www.w3.org/1999/xlink";
+
+function loadContent (json) {
+	var url_tags = json.url_tags;
+	if (url_tags.length == 0) {
+		alart("This generator requires 2 url_tags");
+		return;
+	} else if (url_tags.length == 1) {
+		alart("This generator requires 2 url_tags");
+		url_tags = [url_tags[0], url_tags[0]];
+	}
+	var cards = json.cards;
+
+	for (var start = 0; start < cards.length; start += 10) {
+		var svg = document.createElementNS (svgNS, "svg");
+		svg.setAttribute ("width", paper_width - horizontalMargin * 2 + "mm");
+		svg.setAttribute ("height", paper_height - verticalMargin * 2 + "mm");
+
+		var defs = document.createElementNS (svgNS, "defs");
+		svg.appendChild (defs);
+
+		var style = document.createElementNS (svgNS, "style");
+		style.setAttribute ("href", "51402.css");
+		defs.appendChild (style);
+
+		for (var h = 0; h < numberOfColumns; h++) {
+			for (var v = 0; v < numberOfRows; v++) {
+				if (start + h * numberOfRows + v >= cards.length)
+					continue;
+
+				var x = h * (sheetWidth + sheetHorizontalMargin) + sheetPaddingWidth;
+				var y = v * (sheetHeight + sheetVerticalMargin) + sheetPaddingHeight;
+				var item = cards [start + h * numberOfRows + v];
+
+				var qrcode1 = qrcode(4, 'M');
+			  qrcode1.addData(item.urls[url_tags[0]], "Byte");
+			  qrcode1.make();
+			  qrcode1 = qrcode1.createDataURL();
+				var qrcode2 = qrcode(4, 'M');
+			  qrcode2.addData(item.urls[url_tags[1]], "Byte");
+			  qrcode2.make();
+			  qrcode2 = qrcode2.createDataURL();
+
+				var rectOuter = document.createElementNS (svgNS, "rect");
+				rectOuter.setAttribute ("class", "sheet-inner");
+				rectOuter.setAttribute ("x", (h * sheetWidth) + "mm");
+				rectOuter.setAttribute ("y", (v * sheetHeight) + "mm");
+				rectOuter.setAttribute ("width", sheetWidth + "mm");
+				rectOuter.setAttribute ("height", sheetHeight + "mm");
+				svg.appendChild (rectOuter);
+
+				var imagePdf = document.createElementNS (svgNS, "image");
+				imagePdf.setAttributeNS (xlinkNS, "href", qrcode1);
+				imagePdf.setAttribute ("x", x + 5 + "mm");
+				imagePdf.setAttribute ("y", y + 5 + "mm");
+				imagePdf.setAttribute ("width", "25mm");
+				imagePdf.setAttribute ("height", "25mm");
+				svg.appendChild (imagePdf);
+
+				var imageEpub = document.createElementNS (svgNS, "image");
+				imageEpub.setAttributeNS (xlinkNS, "href", qrcode2);
+				imageEpub.setAttribute ("x", x + 61 + "mm");
+				imageEpub.setAttribute ("y", y + 25 + "mm");
+				imageEpub.setAttribute ("width", "25mm");
+				imageEpub.setAttribute ("height", "25mm");
+				svg.appendChild (imageEpub);
+
+				var title = document.createElementNS (svgNS, "text");
+				title.setAttribute ("class", "label");
+				title.setAttribute ("font-weight", "bold");
+				title.setAttribute ("x", x + 33 + "mm");
+				title.setAttribute ("y", y + 10 + "mm");
+				title.setAttribute ("width", "50mm");
+				title.setAttribute ("height", "8mm");
+				title.appendChild (document.createTextNode (item.title));
+				svg.appendChild (title);
+
+				var alabel = document.createElementNS (svgNS, "text");
+				alabel.setAttribute ("class", "label");
+				alabel.setAttribute ("x", x + 33 + "mm");
+				alabel.setAttribute ("y", y + 15 + "mm");
+				alabel.setAttribute ("width", "50mm");
+				alabel.setAttribute ("height", "8mm");
+				alabel.appendChild (document.createTextNode ("管理番号:" + item.id_label));
+				svg.appendChild (alabel);
+
+				var expiry = document.createElementNS (svgNS, "text");
+				expiry.setAttribute ("class", "label");
+				expiry.setAttribute ("x", x + 33 + "mm");
+				expiry.setAttribute ("y", y + 20 + "mm");
+				expiry.setAttribute ("width", "50mm");
+				expiry.setAttribute ("height", "8mm");
+				expiry.appendChild (document.createTextNode ("使用期限: " + item.expired_at));
+				svg.appendChild (expiry);
+
+				var email = document.createElementNS (svgNS, "text");
+				email.setAttribute ("class", "label");
+				email.setAttribute ("x", x + 5 + "mm");
+				email.setAttribute ("y", y + 47 + "mm");
+				email.setAttribute ("width", "50mm");
+				email.setAttribute ("height", "8mm");
+				email.appendChild (document.createTextNode ("お問い合わせ先: " + item.contact));
+				svg.appendChild (email);
+
+				var logo = document.createElementNS (svgNS, "image");
+				logo.setAttributeNS (xlinkNS, "href", item.cover_image_url);
+				logo.setAttribute ("x", x + 70 + "mm");
+				logo.setAttribute ("y", y + 5 + "mm");
+				logo.setAttribute ("width", "15mm");
+				logo.setAttribute ("height", "15mm");
+				svg.appendChild (logo);
+
+				var descPdf = document.createElementNS (svgNS, "text");
+				descPdf.setAttribute ("class", "label");
+				descPdf.setAttribute ("x", x + 15 + "mm");
+				descPdf.setAttribute ("y", y + 38 + "mm");
+				descPdf.setAttribute ("width", "50mm");
+				descPdf.setAttribute ("height", "8mm");
+				descPdf.appendChild (document.createTextNode ("↑"+url_tags[0]));
+				svg.appendChild (descPdf);
+
+				var descEpub = document.createElementNS (svgNS, "text");
+				descEpub.setAttribute ("class", "label");
+				descEpub.setAttribute ("x", x + 45 + "mm");
+				descEpub.setAttribute ("y", y + 38 + "mm");
+				descEpub.setAttribute ("width", "50mm");
+				descEpub.setAttribute ("height", "8mm");
+				descEpub.appendChild (document.createTextNode (url_tags[1] + "→"));
+				svg.appendChild (descEpub);
+			}
+		}
+		document.body.appendChild (svg);
+	}
+}
+
+function openFile(evt)
+{
+	var reader = new FileReader();
+	reader.onload = function() {
+		while (document.body.firstChild != null)
+			document.body.removeChild (document.body.firstChild);
+
+		var json = JSON.parse(reader.result);
+		loadContent(json);
+	};
+	reader.readAsText(evt.target.files[0]);
+}
+
+//</script>
+
+</head>
+<body>
+
+<h1>[[印刷前に注意してほしいこと]]</h1>
+<p>プリンタの印刷用紙設定で、上下マージン7mm、左右マージン12mmに設定してください</p>
+<p><input type='file' onchange='openFile(event)' /></p>
+
+
+</body>
+</html>
