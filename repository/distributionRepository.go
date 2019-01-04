@@ -174,7 +174,6 @@ func SaveDistributionCodes(ctx context.Context, items *[]entity.DistributionCode
 	} else {
 		return err
 	}
-
 }
 
 func SaveDistributionGenerationTag(ctx context.Context, item *entity.DistributionGenerationTag) (*entity.DistributionGenerationTag, error) {
