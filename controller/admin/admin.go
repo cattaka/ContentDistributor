@@ -15,6 +15,8 @@ import (
 	"github.com/cattaka/ContentDistributor/util"
 	"regexp"
 	"strconv"
+	"encoding/json"
+	"strings"
 )
 
 const (
@@ -33,6 +35,21 @@ type templateParams struct {
 	DistributionCodes          []entity.DistributionCode
 	DistributionGenerationTag  *entity.DistributionGenerationTag
 	DistributionGenerationTags []entity.DistributionGenerationTag
+}
+
+type cardInfos struct {
+	UrlTags []string   `json:"url_tags"`
+	Cards   []cardInfo `json:"cards"`
+}
+
+type cardInfo struct {
+	Contact       string            `json:"contact"`
+	Title         string            `json:"title"`
+	IdLabel       string            `json:"id_label"`
+	ExpiredAt     string            `json:"expired_at"`
+	RealExpiredAt string            `json:"real_expired_at"`
+	CoverImageUrl string            `json:"cover_image_url"`
+	Urls          map[string]string `json:"urls"`
 }
 
 func IndexHandler(cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
@@ -60,6 +77,8 @@ func IndexHandler(cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
 		deleteDistributionFile(&ctx, cb, w, r)
 	} else if r.Method == "GET" && r.URL.Path == PathPrefix+"editDistributionCodes" {
 		showEditDistributionCodes(&ctx, cb, w, r)
+	} else if r.Method == "GET" && r.URL.Path == PathPrefix+"downloadDistributionCodes" {
+		downloadDistributionCodes(&ctx, cb, w, r)
 	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"generateDistributionCodes" {
 		generateDistributionCodes(&ctx, cb, w, r)
 	} else if r.Method == "POST" && r.URL.Path == PathPrefix+"signIn" {
@@ -169,6 +188,7 @@ func postEditDistribution(ctx *context.Context, cb core.CoreBundle, w http.Respo
 		Title:         r.FormValue("Title"),
 		ExpiredAt:     expiredAt,
 		RealExpiredAt: realExpiredAt,
+		Contact:       r.FormValue("Contact"),
 		CoverImageUrl: r.FormValue("CoverImageUrl"),
 	}
 	repository.SaveDistribution(*ctx, &item)
@@ -398,4 +418,74 @@ func generateDistributionCodes(ctx *context.Context, cb core.CoreBundle, w http.
 	}
 
 	http.Redirect(w, r, fmt.Sprintf("%seditDistributionCodes?Key=%s", PathPrefix, tag.Key.Encode()), http.StatusFound)
+}
+
+func downloadDistributionCodes(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
+	params := templateParams{}
+	if _, found := cb.Session.Values[KeyAuthToken]; !found {
+		http.Redirect(w, r, PathPrefix, http.StatusFound)
+		return
+	}
+	params.SignedIn = true
+
+	if k, err := datastore.DecodeKey(r.FormValue("Key")); err != nil {
+		http.Redirect(w, r, PathPrefix, http.StatusFound)
+		return
+	} else if tag, err := repository.FindDistributionGenerationTag(*ctx, k); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	} else if item, err := repository.FindDistribution(*ctx, tag.Parent); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	} else if files, err := repository.FindDistributionFiles(*ctx, item.Key, false); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	} else if codes, err := repository.FindDistributionCodesByTag(*ctx, tag.Key, false); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	} else {
+		params.Distribution = item
+		params.DistributionGenerationTag = tag
+		params.DistributionCodes = codes
+		params.DistributionFiles = files
+	}
+
+	var schema string
+	if strings.HasPrefix(r.Proto, "HTTP/") {
+		schema = "http"
+	} else {
+		schema = "https"
+	}
+	cardInfos := cardInfos{}
+	for _, file := range params.DistributionFiles {
+		cardInfos.UrlTags = append(cardInfos.UrlTags, file.ShortLabel)
+	}
+	for _, code := range params.DistributionCodes {
+		card := cardInfo{
+			Title:         params.Distribution.Title,
+			Contact:       params.Distribution.Contact,
+			IdLabel:       code.IdLabel,
+			ExpiredAt:     params.Distribution.ExpiredAt.Format("2006-01-02"),
+			RealExpiredAt: params.Distribution.RealExpiredAt.Format("2006-01-02"),
+			CoverImageUrl: params.Distribution.CoverImageUrl,
+			Urls:          map[string]string{},
+		}
+		for _, file := range params.DistributionFiles {
+			url := fmt.Sprintf("%s://%s/%s/%s", schema, r.Host, code.Code, file.FileName)
+			card.Urls[file.ShortLabel] = url
+		}
+		cardInfos.Cards = append(cardInfos.Cards, card)
+	}
+
+	if bytes, err := json.Marshal(cardInfos); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+	} else {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(bytes)
+	}
 }

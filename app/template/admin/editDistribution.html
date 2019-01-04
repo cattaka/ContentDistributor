@@ -25,6 +25,7 @@
         <li>Title: <input type="text" name="Title" value="{{.Title}}"></li>
         <li>ExpiredAt: <input type="date" name="ExpiredAt" value="{{.ExpiredAt.Format "2006-01-02"}}"></li>
         <li>RealExpiredAt: <input type="date" name="RealExpiredAt" value="{{.RealExpiredAt.Format "2006-01-02"}}"></li>
+        <li>Contact: <input type="text" name="Contact" value="{{.Contact}}"></li>
         <li>
             CoverImageUrl: <input type="text" name="CoverImageUrl" value="{{.CoverImageUrl}}">
             <a href="{{.CoverImageUrl}}" target="_blank"><img src="{{.CoverImageUrl}}" width="48pt"></a>
@@ -66,7 +67,7 @@
     </tr>
 {{end}}
 </table>
-<a href="https://console.cloud.google.com/storage/browser/{{$firebaseConfig.StorageBucket}}/o/{{.Distribution.Key.Encode}}/?project={{$firebaseConfig.StorageBucket}}">Open
+<a href="https://console.cloud.google.com/storage/browser/{{$firebaseConfig.StorageBucket}}/orig/{{.Distribution.Key.Encode}}/?project={{$firebaseConfig.StorageBucket}}" target="_blank">Open
     in Google Storage</a>
 
 <h3>Upload new file</h3>

@@ -10,6 +10,7 @@ type Distribution struct {
 	Title         string
 	ExpiredAt     time.Time
 	RealExpiredAt time.Time
+	Contact       string
 	CoverImageUrl string
 	Disabled      bool
 }
