@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/cattaka/ContentDistributor/entity"
 	"google.golang.org/appengine/datastore"
+	"github.com/cattaka/ContentDistributor/util"
 )
 
 func FindDistributionsAll(ctx context.Context, withDisabled bool) ([]entity.Distribution, error) {
@@ -183,4 +184,27 @@ func SaveDistributionGenerationTag(ctx context.Context, item *entity.Distributio
 	}
 	item.Key, err = datastore.Put(ctx, item.Key, item)
 	return item, err
+}
+
+func GenNextUniqueCode(ctx context.Context, length int) (string, error) {
+	var code string
+	err := datastore.RunInTransaction(ctx, func(c context.Context) error {
+		for ; ; {
+			code = util.RandString(length)
+			nextKey := datastore.NewKey(ctx, "UniqueCode", code, 0, nil)
+			var item = entity.UniqueCode{}
+			if err := datastore.Get(c, nextKey, &item); err == nil {
+				continue // Already exists
+			} else if err != datastore.ErrNoSuchEntity {
+				return err
+			}
+			item.Code = code
+			if _, err := datastore.Put(c, nextKey, &item); err != nil {
+				return err
+			}
+			break
+		}
+		return nil
+	}, nil)
+	return code, err
 }

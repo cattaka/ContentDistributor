@@ -25,6 +25,11 @@ indexes:
 
 - kind: DistributionCode
   properties:
+  - name: Code
+  - name: IdLabel
+
+- kind: DistributionCode
+  properties:
   - name: Disabled
   - name: GenerationTag
   - name: IdLabel

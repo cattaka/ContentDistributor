@@ -50,7 +50,7 @@
         <td>{{$code.IdLabel}}</td>
         <td>
         {{ range $file := $files }}
-            <span><a href="/{{$code.Key.Encode}}/{{$file.FileName}}">{{ $file.FileName }}</a></span>
+            <span><a href="/{{$code.Code}}/{{$file.FileName}}">{{ $file.FileName }}</a></span>
         {{ end }}
         </td>
         <td>{{$code.Count}}</td>

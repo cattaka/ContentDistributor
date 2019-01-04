@@ -375,14 +375,21 @@ func generateDistributionCodes(ctx *context.Context, cb core.CoreBundle, w http.
 
 	var distributionCodes []entity.DistributionCode
 	for i := idFrom; i <= idTo; i++ {
-		distributionCodes = append(distributionCodes,
-			entity.DistributionCode{
-				Parent:        distribution.Key,
-				GenerationTag: tag.Key,
-				IdLabel:       fmt.Sprintf(idFormat, i),
-				Count:         0,
-				Disabled:      false,
-			})
+		if nextCode, err := repository.GenNextUniqueCode(*ctx, 16); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(err.Error()))
+			return
+		} else {
+			distributionCodes = append(distributionCodes,
+				entity.DistributionCode{
+					Parent:        distribution.Key,
+					Code:          nextCode,
+					GenerationTag: tag.Key,
+					IdLabel:       fmt.Sprintf(idFormat, i),
+					Count:         0,
+					Disabled:      false,
+				})
+		}
 	}
 	if err := repository.SaveDistributionCodes(*ctx, &distributionCodes); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -390,5 +397,5 @@ func generateDistributionCodes(ctx *context.Context, cb core.CoreBundle, w http.
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("%seditDistributionCodes?Key=%s", PathPrefix, distribution.Key.Encode()), http.StatusFound)
+	http.Redirect(w, r, fmt.Sprintf("%seditDistributionCodes?Key=%s", PathPrefix, tag.Key.Encode()), http.StatusFound)
 }

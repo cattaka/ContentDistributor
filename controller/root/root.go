@@ -7,8 +7,7 @@ import (
 	"strings"
 	"google.golang.org/appengine"
 	"html/template"
-	"google.golang.org/appengine/datastore"
-	"github.com/cattaka/ContentDistributor/repository"
+		"github.com/cattaka/ContentDistributor/repository"
 	"github.com/cattaka/ContentDistributor/entity"
 	"fmt"
 	"cloud.google.com/go/storage"
@@ -45,16 +44,14 @@ func download(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, r
 	var distribution *entity.Distribution
 	var code *entity.DistributionCode
 	var files []entity.DistributionFile
-	if k,err := datastore.DecodeKey(keyStr); err != nil {
+	if items, err := repository.FindDistributionCodeByCode(*ctx, keyStr); err != nil || len(items) == 0 {
 		return false
-	} else if c, err := repository.FindDistributionCode(*ctx, k); err != nil {
+	} else if d, err := repository.FindDistribution(*ctx, items[0].Parent); err != nil {
 		return false
-	} else if d, err := repository.FindDistribution(*ctx, c.Parent); err != nil {
-		return false
-	} else if f, err := repository.FindDistributionFiles(*ctx, c.Parent, false); err != nil {
+	} else if f, err := repository.FindDistributionFiles(*ctx, items[0].Parent, false); err != nil {
 		return false
 	} else {
-		code = c
+		code = &items[0]
 		distribution = d
 		files = f
 	}

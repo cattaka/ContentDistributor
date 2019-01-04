@@ -26,6 +26,7 @@ type DistributionFile struct {
 type DistributionCode struct {
 	Key           *datastore.Key `datastore:"-"`
 	Parent        *datastore.Key
+	Code          string
 	GenerationTag *datastore.Key
 	IdLabel       string
 	Count         int
@@ -40,4 +41,9 @@ type DistributionGenerationTag struct {
 	IdFrom   int
 	IdTo     int
 	Disabled bool
+}
+
+type UniqueCode struct {
+	Key  *datastore.Key `datastore:"-"`
+	Code string
 }
