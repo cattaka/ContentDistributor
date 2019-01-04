@@ -72,8 +72,8 @@ func download(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, r
 		return true
 	}
 
-	downloadFileFullPath := fmt.Sprintf("%s/%s", code.Key.Encode(), fileName)
-	origFileFullPath := fmt.Sprintf("o/%s/%s", distribution.Key.Encode(), fileName)
+	downloadFileFullPath := fmt.Sprintf("dist/%s/%s", code.Key.Encode(), fileName)
+	origFileFullPath := fmt.Sprintf("orig/%s/%s", distribution.Key.Encode(), fileName)
 
 	client, err := storage.NewClient(*ctx, *(cb.ClientOption))
 	if err != nil {

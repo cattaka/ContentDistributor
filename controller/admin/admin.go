@@ -202,7 +202,7 @@ func addDistributionFile(ctx *context.Context, cb core.CoreBundle, w http.Respon
 		return
 	}
 
-	fileFullPath := fmt.Sprintf("o/%s/%s", key.Encode(), fileName)
+	fileFullPath := fmt.Sprintf("orig/%s/%s", key.Encode(), fileName)
 
 	var url string
 	if f, fh, err := r.FormFile("File"); err != nil {
