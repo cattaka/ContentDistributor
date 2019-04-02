@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head>
+    <title>ContentDistributor Admin</title>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+
+    <script src="https://www.gstatic.com/firebasejs/5.7.2/firebase.js"></script>
+    <script src="https://cdn.firebase.com/libs/firebaseui/2.6.2/firebaseui.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/2.6.2/firebaseui.css"/>
+
+    <script>
+        // Initialize Firebase
+        var config = {{ .FirebaseConfig }};
+        firebase.initializeApp(config);
+        firebase.auth().signOut();
+    </script>
+</head>
+<body>
+<div class="navigation">
+    <a href="/admin/">Admin</a>
+    &gt;
+    SignInOut
+</div>
+
+<h1>ContentDistributor Admin</h1>
+
+{{with .Notice}}<div id="notice">{{.}}</div>{{end}}
+
+</body>
+</html>

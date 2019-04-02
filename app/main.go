@@ -22,16 +22,26 @@ var (
 )
 
 func main() {
-	bytes, err := ioutil.ReadFile("firebaseConfig.json")
-	if err != nil { panic(err) }
 	var firebaseConfig core.FirebaseConfig
-	if err := json.Unmarshal(bytes, &firebaseConfig); err != nil { panic(err) }
+	if bytes, err := ioutil.ReadFile("firebaseConfig.json"); err != nil {
+		panic(err)
+	} else if err := json.Unmarshal(bytes, &firebaseConfig); err != nil {
+		panic(err)
+	}
 
 	clientOption := option.WithCredentialsFile("serviceAccountKey.json")
+
+	var aclConfig core.AclConfig
+	if bytes, err := ioutil.ReadFile("aclConfig.json"); err != nil {
+		panic(err)
+	} else if err := json.Unmarshal(bytes, &aclConfig); err != nil {
+		panic(err)
+	}
 	coreBundle = core.CoreBundle{
 		SessionStore: cascadestore.NewCascadeStore(cascadestore.DistributedBackends, sessionSecret),
 		ClientOption: &clientOption,
 		FirebaseConfig: &firebaseConfig,
+		AclConfig: &aclConfig,
 	}
 
 	http.HandleFunc("/", indexHandler)

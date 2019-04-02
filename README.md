@@ -10,6 +10,8 @@ It generates URLs for download them.
 - Put 2 files, those are from Firebase Console
   - app/firebaseConfig.json
   - app/serviceAccountKey.json
+- Put 1 file
+  - app/aclConfig.json
 - Test and check with dev_appserver.py
   - $ cd app
   - $ ./dev_appserver.py app.yaml

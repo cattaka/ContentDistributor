@@ -1,3 +1,4 @@
 .idea/
 serviceAccountKey.json
 firebaseConfig.json
+aclConfig.json

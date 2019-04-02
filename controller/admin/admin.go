@@ -17,7 +17,7 @@ import (
 	"strconv"
 	"encoding/json"
 	"strings"
-)
+	)
 
 const (
 	sessionName  = "MainSession"
@@ -112,27 +112,39 @@ func showSignInOut(ctx *context.Context, cb core.CoreBundle, w http.ResponseWrit
 
 func signIn(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {
 	token := r.FormValue("token")
-	app, err := firebase.NewApp(*ctx, nil, *cb.ClientOption)
-	if err != nil {
+	if app, err := firebase.NewApp(*ctx, nil, *cb.ClientOption); err != nil{
 		panic(err)
-	}
-	auth, err := app.Auth(*ctx)
-	if err != nil {
+	} else if auth, err := app.Auth(*ctx); err != nil {
 		panic(err)
-	}
-	tok, err := auth.VerifyIDTokenAndCheckRevoked(*ctx, r.FormValue("token"))
-	if err != nil {
+	} else if tok, err := auth.VerifyIDTokenAndCheckRevoked(*ctx, r.FormValue("token")); err != nil {
 		panic(err)
-	}
-	_, err = auth.GetUser(*ctx, tok.UID)
-	if err != nil {
+	} else if userInfo, err := auth.GetUser(*ctx, tok.UID); err != nil {
 		panic(err)
+	} else if !checkAvailableUser(cb, userInfo.Email) {
+		params := templateParams{
+			Notice: "This account is not allowed",
+			FirebaseConfig: *cb.FirebaseConfig,
+		}
+		htmlTemplate := template.Must(template.ParseFiles("template/admin/signOut.html"))
+		htmlTemplate.Execute(w, params)
+		return
 	}
 
 	cb.Session.Values[KeyAuthToken] = token
 	cb.Session.Save(r, w)
 
 	http.Redirect(w, r, PathPrefix, http.StatusFound)
+}
+
+func checkAvailableUser(cb core.CoreBundle, email string) bool {
+	for _, pattern := range cb.AclConfig.AvailableAccounts {
+		if strings.HasPrefix(pattern, "*@") && strings.HasSuffix(email, pattern[1:]) {
+			return true
+		} else if pattern == email {
+			return true
+		}
+	}
+	return false
 }
 
 func signOut(ctx *context.Context, cb core.CoreBundle, w http.ResponseWriter, r *http.Request) {

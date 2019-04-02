@@ -20,9 +20,14 @@ type FirebaseConfig struct {
 	MessagingSenderId string `json:"messagingSenderId"`
 }
 
+type AclConfig struct {
+	AvailableAccounts []string `json:"availableAccounts"`
+}
+
 type CoreBundle struct {
 	SessionStore   *cascadestore.CascadeStore
 	Session        *sessions.Session
 	ClientOption   *option.ClientOption
 	FirebaseConfig *FirebaseConfig
+	AclConfig      *AclConfig
 }
