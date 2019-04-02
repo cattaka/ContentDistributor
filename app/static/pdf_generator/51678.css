@@ -1,5 +1,12 @@
-svg { margin: 0px }
-body { margin: 0px }
+svg { margin: 0px; }
+svg.col0 { margin-right: 2mm; }
+svg.col1 { margin-left: 2mm; }
+svg.row0 { margin-bottom: 1mm; }
+svg.row1 { margin-top: 1mm; margin-bottom: 1mm; }
+svg.row2 { margin-top: 1mm; margin-bottom: 1mm; }
+svg.row3 { margin-top: 1mm; margin-bottom: 1mm; }
+svg.row4 { margin-top: 1mm; }
+body { margin: 0px; }
 /* これらのstrokeはデバッグしたい時に指定しましょう */
 .sheet-outer { fill: white; stroke: none; }
 .sheet-inner { fill: white; stroke: none; rx: 15mm; ry: 15mm }
